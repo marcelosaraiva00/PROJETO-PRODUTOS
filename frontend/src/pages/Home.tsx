@@ -1,9 +1,9 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Package, 
-  Plus, 
-  BarChart3, 
+import {
+  Package,
+  Plus,
+  BarChart3,
   TrendingUp,
   ArrowRight,
   CheckCircle,
@@ -75,7 +75,7 @@ const Home: React.FC = () => {
   };
 
   return (
-    <div className="space-y-8">
+  <div className="space-y-8">
       {/* Hero Section */}
       <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-8 text-white">
         <div className="max-w-4xl">

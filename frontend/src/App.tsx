@@ -34,6 +34,7 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
 // Componente interno que usa o contexto
 const AppContent: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const { carregarProdutos, carregarVendas } = useAppContext();
   const { settings } = useSettings();
   const { isAuthenticated, isLoading: authLoading } = useAuth();
@@ -41,6 +42,27 @@ const AppContent: React.FC = () => {
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
+
+  // Carregar estado inicial do sidebar
+  useEffect(() => {
+    const savedCollapsed = localStorage.getItem('sidebar-collapsed');
+    if (savedCollapsed) {
+      setSidebarCollapsed(JSON.parse(savedCollapsed));
+    }
+  }, []);
+
+  // Estado para detectar se é mobile
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+
+  // Atualizar quando a janela for redimensionada
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 1024);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Carregar dados iniciais APENAS se autenticado
   useEffect(() => {
@@ -55,30 +77,50 @@ const AppContent: React.FC = () => {
     document.body.className = settings.theme === 'dark' ? 'dark-theme' : 'light-theme';
   }, [settings.theme]);
 
+  // Calcular a margem baseada no estado do sidebar
+  const getContentMargin = () => {
+    if (isMobile && sidebarOpen) {
+      return 'ml-80'; // 320px para mobile com sidebar aberto
+    }
+    if (!isMobile && !sidebarCollapsed) {
+      return 'lg:ml-80'; // 320px para desktop com sidebar expandido
+    }
+    if (!isMobile && sidebarCollapsed) {
+      return 'lg:ml-20'; // 80px para desktop com sidebar recolhido
+    }
+    return ''; // Sem margem
+  };
+
   return (
-    <div className="min-h-screen flex bg-gray-50 dark-theme:bg-gray-900">
-      {isAuthenticated && <Sidebar isOpen={sidebarOpen} onToggle={toggleSidebar} />}
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className={`min-h-screen flex transition-all duration-300 ${getContentMargin()}`}>
+        {isAuthenticated && <Sidebar isOpen={sidebarOpen} onToggle={toggleSidebar} isMobile={isMobile} />}
 
-      <div className="flex-1 flex flex-col">
-        {isAuthenticated && <Header onToggleSidebar={toggleSidebar} />}
-        
-        <main className="flex-1 p-6 lg:p-8">
-          <Routes>
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
+        <div className="flex-1 flex flex-col">
+          {isAuthenticated && (
+            <div className={`transition-all duration-300 ${getContentMargin()}`}>
+              <Header />
+            </div>
+          )}
 
-            <Route path="/" element={<PrivateRoute><Home /></PrivateRoute>} />
-            <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
-            <Route path="/produtos" element={<PrivateRoute><Produtos /></PrivateRoute>} />
-            <Route path="/adicionar-produto" element={<PrivateRoute><AdicionarProduto /></PrivateRoute>} />
-            <Route path="/vendas" element={<PrivateRoute><Vendas /></PrivateRoute>} />
-            <Route path="/relatorios" element={<PrivateRoute><Relatorios /></PrivateRoute>} />
-            <Route path="/configuracoes" element={<PrivateRoute><Configuracoes /></PrivateRoute>} />
+          <main className={`flex-1 p-6 lg:p-8 transition-all duration-300 ${getContentMargin()}`}>
+            <Routes>
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
 
-            {/* Redireciona qualquer rota desconhecida para a home se autenticado, ou login se não */}
-            <Route path="*" element={isAuthenticated ? <Navigate to="/" /> : <Navigate to="/login" />} />
-          </Routes>
-        </main>
+              <Route path="/" element={<PrivateRoute><Home /></PrivateRoute>} />
+              <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+              <Route path="/produtos" element={<PrivateRoute><Produtos /></PrivateRoute>} />
+              <Route path="/adicionar-produto" element={<PrivateRoute><AdicionarProduto /></PrivateRoute>} />
+              <Route path="/vendas" element={<PrivateRoute><Vendas /></PrivateRoute>} />
+              <Route path="/relatorios" element={<PrivateRoute><Relatorios /></PrivateRoute>} />
+              <Route path="/configuracoes" element={<PrivateRoute><Configuracoes /></PrivateRoute>} />
+
+              {/* Redireciona qualquer rota desconhecida para a home se autenticado, ou login se não */}
+              <Route path="*" element={isAuthenticated ? <Navigate to="/" /> : <Navigate to="/login" />} />
+            </Routes>
+          </main>
+        </div>
       </div>
     </div>
   );
