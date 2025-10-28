@@ -1,23 +1,41 @@
+/**
+ * COMPONENTE DE NOTIFICAÇÃO
+ * 
+ * Componente para exibir notificações temporárias na aplicação.
+ * Suporta diferentes tipos: success, error, warning, info.
+ * Possui auto-dismiss configurável e botão de fechar manual.
+ */
+
 import React from 'react';
 import { CheckCircle, XCircle, AlertCircle, X } from 'lucide-react';
 
+/**
+ * Props do componente Notification
+ */
 export interface NotificationProps {
-  id: string;
-  type: 'success' | 'error' | 'warning' | 'info';
-  title: string;
-  message?: string;
-  onClose: (id: string) => void;
-  duration?: number;
+  id: string;                    // ID único da notificação
+  type: 'success' | 'error' | 'warning' | 'info'; // Tipo da notificação
+  title: string;                 // Título da notificação
+  message?: string;              // Mensagem opcional
+  onClose: (id: string) => void; // Função para fechar a notificação
+  duration?: number;             // Duração em ms (0 = não fecha automaticamente)
 }
 
+/**
+ * Componente Notification - Exibe notificações temporárias
+ */
 const Notification: React.FC<NotificationProps> = ({
   id,
   type,
   title,
   message,
   onClose,
-  duration = 5000
+  duration = 5000 // Padrão: 5 segundos
 }) => {
+  /**
+   * Efeito para auto-dismiss da notificação
+   * Configura um timer para fechar automaticamente após o tempo especificado
+   */
   React.useEffect(() => {
     if (duration > 0) {
       const timer = setTimeout(() => {
@@ -28,6 +46,9 @@ const Notification: React.FC<NotificationProps> = ({
     }
   }, [id, duration, onClose]);
 
+  /**
+   * Retorna o ícone apropriado baseado no tipo da notificação
+   */
   const getIcon = () => {
     switch (type) {
       case 'success':
@@ -43,6 +64,9 @@ const Notification: React.FC<NotificationProps> = ({
     }
   };
 
+  /**
+   * Retorna as classes CSS apropriadas baseadas no tipo da notificação
+   */
   const getStyles = () => {
     switch (type) {
       case 'success':
@@ -61,15 +85,20 @@ const Notification: React.FC<NotificationProps> = ({
   return (
     <div className={`max-w-sm w-full border rounded-lg shadow-lg p-4 ${getStyles()} animate-in slide-in-from-right-full duration-300`}>
       <div className="flex items-start">
+        {/* Ícone da notificação */}
         <div className="flex-shrink-0">
           {getIcon()}
         </div>
+        
+        {/* Conteúdo da notificação */}
         <div className="ml-3 flex-1">
           <h4 className="text-sm font-medium">{title}</h4>
           {message && (
             <p className="mt-1 text-sm opacity-90">{message}</p>
           )}
         </div>
+        
+        {/* Botão de fechar */}
         <div className="ml-4 flex-shrink-0">
           <button
             onClick={() => onClose(id)}

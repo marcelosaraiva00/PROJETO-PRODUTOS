@@ -1,15 +1,28 @@
+/**
+ * COMPONENTE FORMULÁRIO DE PRODUTO
+ * 
+ * Modal para cadastrar ou editar produtos.
+ * Inclui upload de imagem, validação e cálculo de preço sugerido.
+ */
+
 import React, { useState, useEffect } from 'react';
 import { X, Upload, Package, DollarSign } from 'lucide-react';
 import { Produto, NovoProduto } from '../types/Produto';
 
+/**
+ * Props do componente ProdutoForm
+ */
 interface ProdutoFormProps {
-  produto?: Produto | null;
-  isOpen: boolean;
-  onClose: () => void;
-  onSubmit: (produto: NovoProduto) => void;
-  isLoading?: boolean;
+  produto?: Produto | null;              // Produto para edição (null para novo)
+  isOpen: boolean;                       // Estado de abertura do modal
+  onClose: () => void;                   // Função para fechar modal
+  onSubmit: (produto: NovoProduto) => void; // Função para submeter formulário
+  isLoading?: boolean;                   // Estado de carregamento
 }
 
+/**
+ * Componente ProdutoForm - Modal para cadastrar/editar produtos
+ */
 const ProdutoForm: React.FC<ProdutoFormProps> = ({
   produto,
   isOpen,
@@ -17,6 +30,7 @@ const ProdutoForm: React.FC<ProdutoFormProps> = ({
   onSubmit,
   isLoading = false
 }) => {
+  // Estados do formulário
   const [formData, setFormData] = useState({
     nome: '',
     precoCompra: '',
@@ -25,6 +39,9 @@ const ProdutoForm: React.FC<ProdutoFormProps> = ({
   const [imagem, setImagem] = useState<File | null>(null);
   const [previewImagem, setPreviewImagem] = useState<string | null>(null);
 
+  /**
+   * Efeito para carregar dados do produto quando em modo de edição
+   */
   useEffect(() => {
     if (produto) {
       setFormData({
@@ -44,6 +61,9 @@ const ProdutoForm: React.FC<ProdutoFormProps> = ({
     setImagem(null);
   }, [produto, isOpen]);
 
+  /**
+   * Manipular mudanças nos campos de input
+   */
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -52,6 +72,9 @@ const ProdutoForm: React.FC<ProdutoFormProps> = ({
     }));
   };
 
+  /**
+   * Manipular upload de imagem
+   */
   const handleImagemChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -64,6 +87,9 @@ const ProdutoForm: React.FC<ProdutoFormProps> = ({
     }
   };
 
+  /**
+   * Submeter formulário
+   */
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -82,12 +108,18 @@ const ProdutoForm: React.FC<ProdutoFormProps> = ({
     onSubmit(novoProduto);
   };
 
+  /**
+   * Calcular preço sugerido com margem de 50%
+   */
   const calcularPrecoSugerido = () => {
     const precoCompra = parseFloat(formData.precoCompra);
     if (isNaN(precoCompra)) return 0;
     return precoCompra * 1.5; // Margem de 50%
   };
 
+  /**
+   * Formatar valor monetário
+   */
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
@@ -100,6 +132,7 @@ const ProdutoForm: React.FC<ProdutoFormProps> = ({
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        {/* Cabeçalho do modal */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <h2 className="text-xl font-semibold text-gray-900 flex items-center">
             <Package className="h-5 w-5 mr-2 text-blue-600" />
@@ -113,7 +146,9 @@ const ProdutoForm: React.FC<ProdutoFormProps> = ({
           </button>
         </div>
 
+        {/* Formulário */}
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          {/* Campo nome */}
           <div>
             <label htmlFor="nome" className="block text-sm font-medium text-gray-700 mb-2">
               Nome do Produto *
@@ -130,6 +165,7 @@ const ProdutoForm: React.FC<ProdutoFormProps> = ({
             />
           </div>
 
+          {/* Campos de preço e quantidade */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label htmlFor="precoCompra" className="block text-sm font-medium text-gray-700 mb-2">
@@ -167,6 +203,7 @@ const ProdutoForm: React.FC<ProdutoFormProps> = ({
             </div>
           </div>
 
+          {/* Preview do preço sugerido */}
           {formData.precoCompra && (
             <div className="bg-green-50 p-4 rounded-lg">
               <div className="flex items-center text-green-700 mb-2">
@@ -182,6 +219,7 @@ const ProdutoForm: React.FC<ProdutoFormProps> = ({
             </div>
           )}
 
+          {/* Upload de imagem */}
           <div>
             <label htmlFor="imagem" className="block text-sm font-medium text-gray-700 mb-2">
               Foto do Produto
@@ -195,6 +233,7 @@ const ProdutoForm: React.FC<ProdutoFormProps> = ({
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
               />
               
+              {/* Preview da imagem */}
               {previewImagem && (
                 <div className="relative">
                   <img
@@ -207,6 +246,7 @@ const ProdutoForm: React.FC<ProdutoFormProps> = ({
             </div>
           </div>
 
+          {/* Botões de ação */}
           <div className="flex items-center justify-end space-x-3 pt-6 border-t border-gray-200">
             <button
               type="button"

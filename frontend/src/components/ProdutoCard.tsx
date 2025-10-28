@@ -1,14 +1,30 @@
+/**
+ * COMPONENTE PRODUTO CARD
+ * 
+ * Card para exibir informações de um produto de forma visual.
+ * Inclui imagem, preços, estoque, status e botões de ação.
+ */
+
 import React from 'react';
 import { Package, Edit, Trash2, DollarSign } from 'lucide-react';
 import { Produto } from '../types/Produto';
 
+/**
+ * Props do componente ProdutoCard
+ */
 interface ProdutoCardProps {
-  produto: Produto;
-  onEdit: (produto: Produto) => void;
-  onDelete: (id: string) => void;
+  produto: Produto;                    // Dados do produto
+  onEdit: (produto: Produto) => void;  // Função para editar produto
+  onDelete: (id: string) => void;     // Função para deletar produto
 }
 
+/**
+ * Componente ProdutoCard - Exibe informações de um produto
+ */
 const ProdutoCard: React.FC<ProdutoCardProps> = ({ produto, onEdit, onDelete }) => {
+  /**
+   * Formatar valor monetário em Real brasileiro
+   */
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
@@ -16,10 +32,16 @@ const ProdutoCard: React.FC<ProdutoCardProps> = ({ produto, onEdit, onDelete }) 
     }).format(value);
   };
 
+  /**
+   * Formatar data em formato brasileiro
+   */
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('pt-BR');
   };
 
+  /**
+   * Determinar status do estoque baseado na porcentagem disponível
+   */
   const getEstoqueStatus = () => {
     const porcentagem = (produto.quantidadeDisponivel / produto.quantidadeComprada) * 100;
     if (porcentagem > 50) return { text: 'Estoque Alto', color: 'text-green-600' };
@@ -32,6 +54,7 @@ const ProdutoCard: React.FC<ProdutoCardProps> = ({ produto, onEdit, onDelete }) 
   return (
     <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden">
       <div className="p-6">
+        {/* Cabeçalho do card com nome e botões de ação */}
         <div className="flex items-start justify-between mb-4">
           <div className="flex-1">
             <h3 className="text-lg font-semibold text-gray-900 mb-2">
@@ -43,6 +66,7 @@ const ProdutoCard: React.FC<ProdutoCardProps> = ({ produto, onEdit, onDelete }) 
             </div>
           </div>
           <div className="flex space-x-2">
+            {/* Botão de editar */}
             <button
               onClick={() => onEdit(produto)}
               className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-full transition-colors"
@@ -50,6 +74,7 @@ const ProdutoCard: React.FC<ProdutoCardProps> = ({ produto, onEdit, onDelete }) 
             >
               <Edit className="h-4 w-4" />
             </button>
+            {/* Botão de deletar */}
             <button
               onClick={() => onDelete(produto.id)}
               className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-full transition-colors"
@@ -60,6 +85,7 @@ const ProdutoCard: React.FC<ProdutoCardProps> = ({ produto, onEdit, onDelete }) 
           </div>
         </div>
 
+        {/* Imagem do produto (se existir) */}
         {produto.imagem && (
           <div className="mb-4">
             <img
@@ -70,6 +96,7 @@ const ProdutoCard: React.FC<ProdutoCardProps> = ({ produto, onEdit, onDelete }) 
           </div>
         )}
 
+        {/* Grid de informações de preços */}
         <div className="grid grid-cols-2 gap-4 mb-4">
           <div className="bg-gray-50 p-3 rounded-lg">
             <div className="text-sm text-gray-600 mb-1">Preço de Compra</div>
@@ -86,6 +113,7 @@ const ProdutoCard: React.FC<ProdutoCardProps> = ({ produto, onEdit, onDelete }) 
           </div>
         </div>
 
+        {/* Grid de informações de quantidade */}
         <div className="grid grid-cols-2 gap-4 mb-4">
           <div className="bg-blue-50 p-3 rounded-lg">
             <div className="text-sm text-blue-600 mb-1">Quantidade Comprada</div>
@@ -101,6 +129,7 @@ const ProdutoCard: React.FC<ProdutoCardProps> = ({ produto, onEdit, onDelete }) 
           </div>
         </div>
 
+        {/* Rodapé com status do estoque e margem */}
         <div className="flex items-center justify-between">
           <div className={`text-sm font-medium ${estoqueStatus.color}`}>
             {estoqueStatus.text}

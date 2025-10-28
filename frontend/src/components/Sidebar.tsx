@@ -24,7 +24,7 @@ interface SidebarProps {
 const Sidebar: FC<SidebarProps> = ({ isOpen, onToggle, isMobile }) => {
   const { user, logout } = useAuth();
   const location = useLocation();
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(true); // Iniciar recolhido por padrão
 
   // Estado persistente do sidebar
   useEffect(() => {
@@ -34,7 +34,8 @@ const Sidebar: FC<SidebarProps> = ({ isOpen, onToggle, isMobile }) => {
       console.log('Carregando estado salvo:', collapsed);
       setIsCollapsed(collapsed);
     } else {
-      console.log('Nenhum estado salvo, usando padrão: false');
+      console.log('Nenhum estado salvo, usando padrão: true (recolhido)');
+      // Não precisa definir setIsCollapsed aqui pois já está como true por padrão
     }
   }, []);
 
@@ -220,12 +221,6 @@ const Sidebar: FC<SidebarProps> = ({ isOpen, onToggle, isMobile }) => {
                         </div>
                       );
                     })()}
-
-                    {isCollapsed && (
-                      <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-sm rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50">
-                        {item.label}
-                      </div>
-                    )}
                   </NavLink>
                 );
               })}

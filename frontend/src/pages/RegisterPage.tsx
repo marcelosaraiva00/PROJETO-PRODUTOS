@@ -8,13 +8,30 @@ const RegisterPage: React.FC = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [nomeCompleto, setNomeCompleto] = useState('');
+  const [documento, setDocumento] = useState('');
+  const [tipoDocumento, setTipoDocumento] = useState<'cpf' | 'cnpj'>('cpf');
+  const [error, setError] = useState(''); // Estado para mensagem de erro
   const { register, isLoading } = useAuth();
   const { showNotification } = useNotification();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(''); // Limpar erro anterior
+
+    // Validações
+    if (!nomeCompleto.trim()) {
+      setError('Nome completo é obrigatório.');
+      return;
+    }
+
+    if (!documento.trim()) {
+      setError(`${tipoDocumento.toUpperCase()} é obrigatório.`);
+      return;
+    }
 
     if (password !== confirmPassword) {
+      setError('As senhas não coincidem. Verifique e tente novamente.');
       showNotification({
         type: 'error',
         title: 'Erro no Registro',
@@ -24,19 +41,53 @@ const RegisterPage: React.FC = () => {
     }
 
     try {
-      await register({ username, password });
+      await register({ 
+        username, 
+        password, 
+        nomeCompleto, 
+        documento, 
+        tipoDocumento 
+      });
       showNotification({
         type: 'success',
         title: 'Registro Bem-Sucedido!',
         message: 'Sua conta foi criada. Faça login para continuar.'
       });
     } catch (error) {
+      setError('Nome de usuário já existe ou ocorreu um erro. Tente novamente.');
       showNotification({
         type: 'error',
         title: 'Erro no Registro',
         message: 'Ocorreu um erro ao registrar. O nome de usuário pode já existir.'
       });
       console.error('Erro de registro:', error);
+    }
+  };
+
+  // Função para limpar erro quando o usuário digitar
+  const clearError = () => {
+    if (error) {
+      setError('');
+    }
+  };
+
+  // Função para formatar CPF/CNPJ
+  const formatDocument = (value: string, type: 'cpf' | 'cnpj') => {
+    const numbers = value.replace(/\D/g, '');
+    if (type === 'cpf') {
+      return numbers.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+    } else {
+      return numbers.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
+    }
+  };
+
+  // Função para validar CPF/CNPJ
+  const validateDocument = (doc: string, type: 'cpf' | 'cnpj') => {
+    const numbers = doc.replace(/\D/g, '');
+    if (type === 'cpf') {
+      return numbers.length === 11;
+    } else {
+      return numbers.length === 14;
     }
   };
 
@@ -208,6 +259,161 @@ const RegisterPage: React.FC = () => {
                     e.target.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)';
                   }}
                 />
+              </div>
+            </div>
+
+            {/* Nome Completo Field */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              <label htmlFor="nomeCompleto" style={{
+                display: 'block',
+                fontSize: '14px',
+                fontWeight: '600',
+                color: 'white',
+                textShadow: '0 1px 2px rgba(0, 0, 0, 0.3)'
+              }}>
+                Nome Completo
+              </label>
+              <div style={{ position: 'relative' }}>
+                <div style={{
+                  position: 'absolute',
+                  top: '50%',
+                  left: '16px',
+                  transform: 'translateY(-50%)',
+                  pointerEvents: 'none',
+                  zIndex: 1
+                }}>
+                  <User style={{ width: '20px', height: '20px', color: '#1e3a8a' }} />
+                </div>
+                <input
+                  type="text"
+                  id="nomeCompleto"
+                  name="nomeCompleto"
+                  value={nomeCompleto}
+                  onChange={(e) => {
+                    setNomeCompleto(e.target.value);
+                    clearError();
+                  }}
+                  style={{
+                    width: '100%',
+                    paddingLeft: '48px',
+                    paddingRight: '16px',
+                    paddingTop: '14px',
+                    paddingBottom: '14px',
+                    border: '2px solid rgba(255, 255, 255, 0.3)',
+                    borderRadius: '12px',
+                    outline: 'none',
+                    background: 'white',
+                    color: '#1e3a8a',
+                    fontSize: '16px',
+                    transition: 'all 0.2s',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+                  }}
+                  placeholder="Digite seu nome completo"
+                  required
+                  disabled={isLoading}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = '#3b82f6';
+                    e.target.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.1)';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+                    e.target.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)';
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Tipo de Documento e Documento */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              <label style={{
+                display: 'block',
+                fontSize: '14px',
+                fontWeight: '600',
+                color: 'white',
+                textShadow: '0 1px 2px rgba(0, 0, 0, 0.3)'
+              }}>
+                Documento
+              </label>
+              <div style={{ display: 'flex', gap: '1rem' }}>
+                {/* Tipo de Documento */}
+                <div style={{ flex: '0 0 120px' }}>
+                  <select
+                    value={tipoDocumento}
+                    onChange={(e) => {
+                      setTipoDocumento(e.target.value as 'cpf' | 'cnpj');
+                      setDocumento(''); // Limpar documento ao trocar tipo
+                      clearError();
+                    }}
+                    style={{
+                      width: '100%',
+                      padding: '14px 16px',
+                      border: '2px solid rgba(255, 255, 255, 0.3)',
+                      borderRadius: '12px',
+                      outline: 'none',
+                      background: 'white',
+                      color: '#1e3a8a',
+                      fontSize: '16px',
+                      transition: 'all 0.2s',
+                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+                    }}
+                    disabled={isLoading}
+                  >
+                    <option value="cpf">CPF</option>
+                    <option value="cnpj">CNPJ</option>
+                  </select>
+                </div>
+                
+                {/* Campo do Documento */}
+                <div style={{ flex: 1, position: 'relative' }}>
+                  <div style={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '16px',
+                    transform: 'translateY(-50%)',
+                    pointerEvents: 'none',
+                    zIndex: 1
+                  }}>
+                    <Shield style={{ width: '20px', height: '20px', color: '#1e3a8a' }} />
+                  </div>
+                  <input
+                    type="text"
+                    id="documento"
+                    name="documento"
+                    value={documento}
+                    onChange={(e) => {
+                      const formatted = formatDocument(e.target.value, tipoDocumento);
+                      setDocumento(formatted);
+                      clearError();
+                    }}
+                    style={{
+                      width: '100%',
+                      paddingLeft: '48px',
+                      paddingRight: '16px',
+                      paddingTop: '14px',
+                      paddingBottom: '14px',
+                      border: '2px solid rgba(255, 255, 255, 0.3)',
+                      borderRadius: '12px',
+                      outline: 'none',
+                      background: 'white',
+                      color: '#1e3a8a',
+                      fontSize: '16px',
+                      transition: 'all 0.2s',
+                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+                    }}
+                    placeholder={tipoDocumento === 'cpf' ? '000.000.000-00' : '00.000.000/0000-00'}
+                    required
+                    disabled={isLoading}
+                    maxLength={tipoDocumento === 'cpf' ? 14 : 18}
+                    onFocus={(e) => {
+                      e.target.style.borderColor = '#3b82f6';
+                      e.target.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.1)';
+                    }}
+                    onBlur={(e) => {
+                      e.target.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+                      e.target.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)';
+                    }}
+                  />
+                </div>
               </div>
             </div>
 

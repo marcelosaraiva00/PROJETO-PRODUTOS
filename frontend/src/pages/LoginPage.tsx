@@ -8,11 +8,14 @@ const LoginPage: React.FC = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
+  const [error, setError] = useState(''); // Estado para mensagem de erro
   const { login, isLoading } = useAuth();
   const { showNotification } = useNotification();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(''); // Limpar erro anterior
+    
     try {
       await login({ username, password });
       showNotification({
@@ -21,12 +24,22 @@ const LoginPage: React.FC = () => {
         message: `Bem-vindo de volta, ${username}!`
       });
     } catch (error) {
+      // Definir mensagem de erro específica
+      setError('Usuário ou senha incorretos. Verifique suas credenciais e tente novamente.');
+      
       showNotification({
         type: 'error',
         title: 'Erro no Login',
         message: 'Usuário ou senha inválidos. Tente novamente.'
       });
       console.error('Erro de login:', error);
+    }
+  };
+
+  // Função para limpar erro quando o usuário digitar
+  const clearError = () => {
+    if (error) {
+      setError('');
     }
   };
 
@@ -100,7 +113,10 @@ const LoginPage: React.FC = () => {
                 id="username"
                 name="username"
                 value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                onChange={(e) => {
+                  setUsername(e.target.value);
+                  clearError(); // Limpar erro quando digitar
+                }}
                 style={{
                   width: '100%',
                   padding: '1rem 1.5rem',
@@ -125,7 +141,10 @@ const LoginPage: React.FC = () => {
                 id="password"
                 name="password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  clearError(); // Limpar erro quando digitar
+                }}
                 style={{
                   width: '100%',
                   padding: '1rem 1.5rem',
@@ -142,6 +161,23 @@ const LoginPage: React.FC = () => {
                 disabled={isLoading}
               />
             </div>
+
+            {/* Error Message */}
+            {error && (
+              <div style={{
+                backgroundColor: '#fef2f2',
+                border: '1px solid #fecaca',
+                borderRadius: '0.75rem',
+                padding: '1rem',
+                color: '#dc2626',
+                fontSize: '0.875rem',
+                fontWeight: '500',
+                textAlign: 'center',
+                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+              }}>
+                {error}
+              </div>
+            )}
 
             {/* Remember & Forgot */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
