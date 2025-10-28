@@ -1,8 +1,8 @@
 {
-  "name": "sistema-produtos",
+  "name": "estoque-facil",
   "version": "1.0.0",
-  "description": "Sistema de cadastro de produtos com controle de estoque",
-  "main": "server.js",
+  "description": "Estoque Fácil - Sistema de gestão de estoque e produtos",
+  "main": "backend/server.js",
   "scripts": {
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "server": "nodemon backend/server.js",
@@ -11,9 +11,11 @@
     "install-all": "npm install && cd frontend && npm install"
   },
   "keywords": [
-    "produtos",
     "estoque",
-    "cadastro"
+    "produtos",
+    "gestão",
+    "cadastro",
+    "vendas"
   ],
   "author": "Marcelo Saraiva",
   "license": "MIT",

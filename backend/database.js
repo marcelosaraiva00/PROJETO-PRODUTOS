@@ -1,5 +1,5 @@
 /**
- * CONFIGURAÇÃO E GERENCIAMENTO DO BANCO DE DADOS SQLITE
+ * CONFIGURAÇÃO E GERENCIAMENTO DO BANCO DE DADOS SQLITE - ESTOQUE FÁCIL
  * 
  * Este arquivo contém toda a configuração do banco de dados SQLite,
  * incluindo criação de tabelas, conexão e operações básicas.
@@ -50,7 +50,12 @@ const createTables = () => {
         documento TEXT UNIQUE NOT NULL,
         tipoDocumento TEXT NOT NULL CHECK (tipoDocumento IN ('cpf', 'cnpj')),
         dataCadastro TEXT NOT NULL,
-        createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
+        isAdmin BOOLEAN DEFAULT 0,
+        isApproved BOOLEAN DEFAULT 0,
+        approvedBy TEXT,
+        approvedAt TEXT,
+        createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (approvedBy) REFERENCES users (id)
       )`,
       
       // Tabela de produtos
@@ -148,11 +153,125 @@ const insertDefaultSettings = () => {
             completed++;
             if (completed === total) {
               console.log('✅ Configurações padrão inseridas');
-              resolve();
+              // Após inserir configurações, criar primeiro admin e atualizar usuários
+              createFirstAdmin()
+                .then(() => updateExistingUsers())
+                .then(() => resolve())
+                .catch(reject);
             }
           }
         }
       );
+    });
+  });
+};
+
+/**
+ * Criar o primeiro administrador se não existir
+ * Define o primeiro usuário como administrador aprovado
+ */
+const createFirstAdmin = () => {
+  return new Promise((resolve, reject) => {
+    // Verificar se já existe um administrador
+    db.get('SELECT * FROM users WHERE isAdmin = 1', (err, admin) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      
+      if (!admin) {
+        // Buscar o primeiro usuário para torná-lo administrador
+        db.get('SELECT * FROM users ORDER BY createdAt ASC LIMIT 1', (err, firstUser) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          
+          if (firstUser) {
+            // Tornar o primeiro usuário administrador e aprovado
+            db.run(
+              'UPDATE users SET isAdmin = 1, isApproved = 1, approvedAt = ? WHERE id = ?',
+              [new Date().toISOString(), firstUser.id],
+              (err) => {
+                if (err) {
+                  reject(err);
+                } else {
+                  console.log(`✅ Primeiro administrador criado: ${firstUser.username}`);
+                  resolve();
+                }
+              }
+            );
+          } else {
+            resolve(); // Nenhum usuário ainda
+          }
+        });
+      } else {
+        resolve(); // Já existe administrador
+      }
+    });
+  });
+};
+
+/**
+ * Atualizar usuários existentes para incluir campos de aprovação
+ * Adiciona campos isAdmin, isApproved, approvedBy, approvedAt se não existirem
+ */
+const updateExistingUsers = () => {
+  return new Promise((resolve, reject) => {
+    // Verificar se os campos já existem
+    db.all("PRAGMA table_info(users)", (err, columns) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      
+      const hasIsAdmin = columns.some(col => col.name === 'isAdmin');
+      const hasIsApproved = columns.some(col => col.name === 'isApproved');
+      
+      if (!hasIsAdmin || !hasIsApproved) {
+        // Adicionar colunas se não existirem
+        const alterQueries = [];
+        
+        if (!hasIsAdmin) {
+          alterQueries.push('ALTER TABLE users ADD COLUMN isAdmin BOOLEAN DEFAULT 0');
+        }
+        
+        if (!hasIsApproved) {
+          alterQueries.push('ALTER TABLE users ADD COLUMN isApproved BOOLEAN DEFAULT 0');
+        }
+        
+        if (!columns.some(col => col.name === 'approvedBy')) {
+          alterQueries.push('ALTER TABLE users ADD COLUMN approvedBy TEXT');
+        }
+        
+        if (!columns.some(col => col.name === 'approvedAt')) {
+          alterQueries.push('ALTER TABLE users ADD COLUMN approvedAt TEXT');
+        }
+        
+        // Executar alterações
+        let completed = 0;
+        if (alterQueries.length === 0) {
+          resolve();
+          return;
+        }
+        
+        alterQueries.forEach((query, index) => {
+          db.run(query, (err) => {
+            if (err) {
+              console.log(`Campo já existe ou erro: ${query}`);
+            } else {
+              console.log(`✅ Campo adicionado: ${query}`);
+            }
+            
+            completed++;
+            if (completed === alterQueries.length) {
+              resolve();
+            }
+          });
+        });
+      } else {
+        resolve();
+      }
     });
   });
 };
@@ -248,5 +367,7 @@ module.exports = {
   closeDatabase,
   runQuery,
   getQuery,
-  getOneQuery
+  getOneQuery,
+  createFirstAdmin,
+  updateExistingUsers
 };

@@ -1,5 +1,5 @@
 /**
- * SERVIDOR PRINCIPAL DO SISTEMA DE GESTÃO DE PRODUTOS E VENDAS
+ * SERVIDOR PRINCIPAL DO ESTOQUE FÁCIL
  * 
  * Este arquivo contém toda a lógica do backend, incluindo:
  * - Configuração do servidor Express
@@ -212,15 +212,17 @@ app.post('/api/register', async (req, res) => {
     // Criptografar a senha usando bcrypt
     const passwordHash = await bcrypt.hash(password, 10);
 
-    // Criar novo usuário no banco de dados
+    // Criar novo usuário no banco de dados (não aprovado por padrão)
     const userId = uuidv4();
     await runQuery(
-      `INSERT INTO users (id, username, passwordHash, nomeCompleto, documento, tipoDocumento, dataCadastro) 
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO users (id, username, passwordHash, nomeCompleto, documento, tipoDocumento, dataCadastro, isApproved) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, 0)`,
       [userId, username, passwordHash, nomeCompleto, documento, tipoDocumento, new Date().toISOString()]
     );
 
-    res.status(201).json({ message: 'Usuário registrado com sucesso' });
+    res.status(201).json({ 
+      message: 'Usuário registrado com sucesso. Aguarde aprovação do administrador para acessar o sistema.' 
+    });
   } catch (error) {
     console.error('Erro ao registrar usuário:', error);
     res.status(500).json({ error: 'Erro ao registrar usuário' });
@@ -247,18 +249,57 @@ app.post('/api/login', async (req, res) => {
       return res.status(400).json({ error: 'Credenciais inválidas' });
     }
 
+    // Verificar se o usuário está aprovado
+    if (!user.isApproved) {
+      return res.status(403).json({ 
+        error: 'Usuário aguardando aprovação do administrador. Entre em contato com o administrador do sistema.' 
+      });
+    }
+
     // Gerar token JWT com expiração de 1 hora
-    const token = jwt.sign({ id: user.id, username: user.username }, JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({ 
+      id: user.id, 
+      username: user.username, 
+      isAdmin: user.isAdmin || false 
+    }, JWT_SECRET, { expiresIn: '1h' });
 
     // Retornar token e dados do usuário
-    res.json({ token, userId: user.id, username: user.username });
+    res.json({ 
+      token, 
+      userId: user.id, 
+      username: user.username,
+      isAdmin: user.isAdmin || false
+    });
   } catch (error) {
     console.error('Erro ao fazer login:', error);
     res.status(500).json({ error: 'Erro ao fazer login' });
   }
 });
 
-// ========== ROTAS DE CONFIGURAÇÕES ==========
+// ========== ROTAS DE USUÁRIO ==========
+
+/**
+ * GET /api/users/me - Obter dados do usuário atual
+ * Retorna os dados completos do usuário autenticado
+ */
+app.get('/api/users/me', authenticateToken, async (req, res) => {
+  try {
+    // Buscar dados completos do usuário no banco de dados
+    const user = await getOneQuery(
+      'SELECT id, username, nomeCompleto, documento, tipoDocumento, dataCadastro, isAdmin, isApproved, approvedAt FROM users WHERE id = ?',
+      [req.user.id]
+    );
+    
+    if (!user) {
+      return res.status(404).json({ error: 'Usuário não encontrado' });
+    }
+    
+    res.json(user);
+  } catch (error) {
+    console.error('Erro ao buscar dados do usuário:', error);
+    res.status(500).json({ error: 'Erro ao buscar dados do usuário' });
+  }
+});
 
 /**
  * GET /api/settings/profit-margin - Obter margem de lucro atual
@@ -365,6 +406,122 @@ app.use((error, req, res, next) => {
   
   // Tratar outros erros gerais
   res.status(500).json({ error: error.message });
+});
+
+/**
+ * Middleware para verificar se o usuário é administrador
+ * Deve ser usado após authenticateToken
+ */
+const requireAdmin = (req, res, next) => {
+  if (!req.user.isAdmin) {
+    return res.status(403).json({ error: 'Acesso negado. Apenas administradores podem acessar esta funcionalidade.' });
+  }
+  next();
+};
+
+/**
+ * GET /api/admin/users/pending - Listar usuários aguardando aprovação
+ * Apenas administradores podem acessar
+ */
+app.get('/api/admin/users/pending', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const pendingUsers = await getQuery(
+      `SELECT id, username, nomeCompleto, documento, tipoDocumento, dataCadastro, createdAt 
+       FROM users 
+       WHERE isApproved = 0 
+       ORDER BY createdAt ASC`
+    );
+    
+    res.json(pendingUsers);
+  } catch (error) {
+    console.error('Erro ao buscar usuários pendentes:', error);
+    res.status(500).json({ error: 'Erro ao buscar usuários pendentes' });
+  }
+});
+
+/**
+ * POST /api/admin/users/:id/approve - Aprovar usuário
+ * Apenas administradores podem aprovar usuários
+ */
+app.post('/api/admin/users/:id/approve', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const adminId = req.user.id;
+    
+    // Verificar se o usuário existe e não está aprovado
+    const user = await getOneQuery('SELECT * FROM users WHERE id = ? AND isApproved = 0', [id]);
+    if (!user) {
+      return res.status(404).json({ error: 'Usuário não encontrado ou já aprovado' });
+    }
+    
+    // Aprovar o usuário
+    await runQuery(
+      'UPDATE users SET isApproved = 1, approvedBy = ?, approvedAt = ? WHERE id = ?',
+      [adminId, new Date().toISOString(), id]
+    );
+    
+    res.json({ 
+      message: `Usuário ${user.username} aprovado com sucesso`,
+      user: {
+        id: user.id,
+        username: user.username,
+        nomeCompleto: user.nomeCompleto
+      }
+    });
+  } catch (error) {
+    console.error('Erro ao aprovar usuário:', error);
+    res.status(500).json({ error: 'Erro ao aprovar usuário' });
+  }
+});
+
+/**
+ * POST /api/admin/users/:id/reject - Rejeitar usuário
+ * Apenas administradores podem rejeitar usuários
+ */
+app.post('/api/admin/users/:id/reject', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Verificar se o usuário existe e não está aprovado
+    const user = await getOneQuery('SELECT * FROM users WHERE id = ? AND isApproved = 0', [id]);
+    if (!user) {
+      return res.status(404).json({ error: 'Usuário não encontrado ou já aprovado' });
+    }
+    
+    // Remover o usuário (rejeitar)
+    await runQuery('DELETE FROM users WHERE id = ?', [id]);
+    
+    res.json({ 
+      message: `Usuário ${user.username} rejeitado e removido do sistema`,
+      user: {
+        id: user.id,
+        username: user.username,
+        nomeCompleto: user.nomeCompleto
+      }
+    });
+  } catch (error) {
+    console.error('Erro ao rejeitar usuário:', error);
+    res.status(500).json({ error: 'Erro ao rejeitar usuário' });
+  }
+});
+
+/**
+ * GET /api/admin/users - Listar todos os usuários (apenas administradores)
+ */
+app.get('/api/admin/users', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const users = await getQuery(
+      `SELECT id, username, nomeCompleto, documento, tipoDocumento, dataCadastro, 
+              isAdmin, isApproved, approvedAt, createdAt 
+       FROM users 
+       ORDER BY createdAt DESC`
+    );
+    
+    res.json(users);
+  } catch (error) {
+    console.error('Erro ao buscar usuários:', error);
+    res.status(500).json({ error: 'Erro ao buscar usuários' });
+  }
 });
 
 // ========== INICIALIZAÇÃO DO SERVIDOR ==========

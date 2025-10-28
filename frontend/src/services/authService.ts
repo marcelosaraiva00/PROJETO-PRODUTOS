@@ -6,7 +6,7 @@
  */
 
 import api from './api';
-import { LoginData, RegisterData, AuthResponse } from '../types/Auth';
+import { LoginData, RegisterData, AuthResponse, User } from '../types/Auth';
 
 /**
  * Serviço para operações de autenticação
@@ -29,6 +29,15 @@ export const authService = {
    */
   register: async (userData: RegisterData): Promise<{ message: string }> => {
     const response = await api.post('/register', userData);
+    return response.data;
+  },
+
+  /**
+   * Buscar dados completos do usuário logado
+   * @returns Promise<User> - Dados completos do usuário
+   */
+  getCurrentUser: async (): Promise<User> => {
+    const response = await api.get('/users/me');
     return response.data;
   },
 };

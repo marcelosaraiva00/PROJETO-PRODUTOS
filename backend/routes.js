@@ -1,5 +1,5 @@
 /**
- * ROTAS DE PRODUTOS E VENDAS ATUALIZADAS PARA BANCO DE DADOS
+ * ROTAS DE PRODUTOS E VENDAS DO ESTOQUE FÁCIL
  * 
  * Este arquivo contém as implementações das rotas de produtos e vendas
  * usando SQLite em vez de armazenamento em memória.

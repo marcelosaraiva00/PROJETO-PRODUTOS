@@ -51,7 +51,7 @@ const RegisterPage: React.FC = () => {
       showNotification({
         type: 'success',
         title: 'Registro Bem-Sucedido!',
-        message: 'Sua conta foi criada. Faça login para continuar.'
+        message: 'Sua conta foi criada. Aguarde aprovação do administrador para acessar o sistema.'
       });
     } catch (error) {
       setError('Nome de usuário já existe ou ocorreu um erro. Tente novamente.');

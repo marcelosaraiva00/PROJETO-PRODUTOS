@@ -12,6 +12,26 @@
 export interface User {
   id: string;        // Identificador único do usuário
   username: string;   // Nome de usuário para login
+  nomeCompleto?: string; // Nome completo do usuário
+  documento?: string;    // CPF ou CNPJ do usuário
+  tipoDocumento?: 'cpf' | 'cnpj'; // Tipo do documento
+  isAdmin?: boolean;    // Se o usuário é administrador
+  isApproved?: boolean; // Se o usuário está aprovado
+  approvedAt?: string;  // Data de aprovação
+}
+
+/**
+ * Interface para usuário pendente de aprovação
+ * Usada na página de administração
+ */
+export interface PendingUser {
+  id: string;
+  username: string;
+  nomeCompleto: string;
+  documento: string;
+  tipoDocumento: 'cpf' | 'cnpj';
+  dataCadastro: string;
+  createdAt: string;
 }
 
 /**
@@ -43,4 +63,5 @@ export interface AuthResponse {
   token: string;     // Token JWT para autenticação
   userId: string;     // ID do usuário autenticado
   username: string;   // Nome de usuário
+  isAdmin?: boolean; // Se o usuário é administrador
 }

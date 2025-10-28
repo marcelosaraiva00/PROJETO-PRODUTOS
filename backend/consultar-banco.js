@@ -1,5 +1,5 @@
 /**
- * CONSULTA COMPLETA COM INICIALIZAÇÃO AUTOMÁTICA
+ * CONSULTA COMPLETA DO ESTOQUE FÁCIL COM INICIALIZAÇÃO AUTOMÁTICA
  * 
  * Este script inicializa o banco de dados e depois executa consultas
  */

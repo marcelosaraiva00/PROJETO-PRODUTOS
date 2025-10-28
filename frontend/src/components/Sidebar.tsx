@@ -11,7 +11,8 @@ import {
   LogOut,
   ChevronLeft,
   ChevronRight,
-  Menu
+  Menu,
+  Shield
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -94,6 +95,14 @@ const Sidebar: FC<SidebarProps> = ({ isOpen, onToggle, isMobile }) => {
       label: 'Configurações',
       description: 'Configurações do sistema',
       shortLabel: 'Config'
+    },
+    {
+      path: '/admin',
+      icon: Shield,
+      label: 'Administração',
+      description: 'Gerenciar usuários e aprovações',
+      shortLabel: 'Admin',
+      adminOnly: true
     }
   ];
 
@@ -181,7 +190,9 @@ const Sidebar: FC<SidebarProps> = ({ isOpen, onToggle, isMobile }) => {
           {/* Navegação */}
           <nav className={`flex-1 p-4 ${isCollapsed ? 'overflow-hidden' : 'overflow-y-auto'}`}>
             <div className="space-y-2">
-              {menuItems.map((item) => {
+              {menuItems
+                .filter(item => !item.adminOnly || user?.isAdmin)
+                .map((item) => {
                 const isActive = location.pathname === item.path;
                 return (
                   <NavLink

@@ -78,14 +78,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // Chamar serviço de autenticação
       const response: AuthResponse = await authService.login(credentials);
       
-      // Atualizar estados locais
+      // Atualizar estados locais PRIMEIRO
       setToken(response.token);
-      const newUser: User = { id: response.userId, username: response.username };
-      setUser(newUser);
       
-      // Salvar dados no localStorage para persistência
+      // Salvar token no localStorage ANTES de buscar dados do usuário
       localStorage.setItem('token', response.token);
-      localStorage.setItem('user', JSON.stringify(newUser));
+      
+      // Buscar dados completos do usuário (agora com token salvo)
+      const userData = await authService.getCurrentUser();
+      
+      // Atualizar estado do usuário
+      setUser(userData);
+      
+      // Salvar dados completos do usuário no localStorage
+      localStorage.setItem('user', JSON.stringify(userData));
       
       // Redirecionar para a página inicial após login bem-sucedido
       navigate('/');

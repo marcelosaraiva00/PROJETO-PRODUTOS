@@ -23,15 +23,24 @@ const LoginPage: React.FC = () => {
         title: 'Login bem-sucedido!',
         message: `Bem-vindo de volta, ${username}!`
       });
-    } catch (error) {
-      // Definir mensagem de erro específica
-      setError('Usuário ou senha incorretos. Verifique suas credenciais e tente novamente.');
-      
-      showNotification({
-        type: 'error',
-        title: 'Erro no Login',
-        message: 'Usuário ou senha inválidos. Tente novamente.'
-      });
+    } catch (error: any) {
+      // Verificar se é erro de aprovação
+      if (error.response?.status === 403) {
+        setError('Usuário aguardando aprovação do administrador. Entre em contato com o administrador do sistema.');
+        showNotification({
+          type: 'error',
+          title: 'Aguardando Aprovação',
+          message: 'Sua conta ainda não foi aprovada pelo administrador.'
+        });
+      } else {
+        // Definir mensagem de erro específica para credenciais incorretas
+        setError('Usuário ou senha incorretos. Verifique suas credenciais e tente novamente.');
+        showNotification({
+          type: 'error',
+          title: 'Erro no Login',
+          message: 'Usuário ou senha inválidos. Tente novamente.'
+        });
+      }
       console.error('Erro de login:', error);
     }
   };

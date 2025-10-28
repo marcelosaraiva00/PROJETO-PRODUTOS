@@ -26,7 +26,7 @@ const Header: FC = () => {
         <div className="flex items-center">
           <div className="hidden lg:block">
             <h1 className="text-lg font-semibold text-gray-900 dark-theme:text-gray-100">
-              Sistema de Produtos
+              Estoque Fácil
             </h1>
           </div>
         </div>

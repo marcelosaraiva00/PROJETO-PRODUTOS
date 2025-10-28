@@ -1,7 +1,7 @@
 /**
  * DEFINIÇÕES DE TIPOS PARA PRODUTOS
  * 
- * Este arquivo contém todas as interfaces relacionadas aos produtos do sistema,
+ * Este arquivo contém todas as interfaces relacionadas aos produtos do Estoque Fácil,
  * incluindo estruturas para criação, edição e exibição de produtos.
  */
 

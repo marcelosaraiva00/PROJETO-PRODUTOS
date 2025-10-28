@@ -80,7 +80,7 @@ const Home: React.FC = () => {
       <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-8 text-white">
         <div className="max-w-4xl">
           <h1 className="text-4xl font-bold mb-4">
-            Bem-vindo ao Sistema de Produtos
+            Bem-vindo ao Estoque Fácil
           </h1>
           <p className="text-xl text-blue-100 mb-6">
             Gerencie seu estoque, controle preços e acompanhe vendas de forma inteligente

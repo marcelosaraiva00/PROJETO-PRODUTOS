@@ -28,6 +28,7 @@ import AdicionarProduto from './pages/AdicionarProduto';
 import Vendas from './pages/Vendas';
 import Relatorios from './pages/Relatorios';
 import Configuracoes from './pages/Configuracoes';
+import AdminPage from './pages/AdminPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 
@@ -165,6 +166,7 @@ const AppContent: React.FC = () => {
               <Route path="/vendas" element={<PrivateRoute><Vendas /></PrivateRoute>} />
               <Route path="/relatorios" element={<PrivateRoute><Relatorios /></PrivateRoute>} />
               <Route path="/configuracoes" element={<PrivateRoute><Configuracoes /></PrivateRoute>} />
+              <Route path="/admin" element={<PrivateRoute><AdminPage /></PrivateRoute>} />
 
               {/* Rota catch-all - redireciona baseado no estado de autenticação */}
               <Route path="*" element={isAuthenticated ? <Navigate to="/" /> : <Navigate to="/login" />} />

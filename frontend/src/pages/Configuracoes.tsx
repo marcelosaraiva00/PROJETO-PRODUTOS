@@ -10,10 +10,12 @@ import {
 } from 'lucide-react';
 import { useSettings } from '../context/SettingsContext';
 import { useNotification } from '../context/NotificationContext';
+import { useAuth } from '../context/AuthContext';
 
 const Configuracoes: React.FC = () => {
   const { settings, toggleTheme, updateProfitMargin, loadSettings } = useSettings();
   const { showNotification } = useNotification();
+  const { user } = useAuth(); // Obter dados do usuário logado
   const [localProfitMargin, setLocalProfitMargin] = useState(settings.profitMargin * 100); // Converte para porcentagem para exibir
   const [notificacoes, setNotificacoes] = useState({
     estoqueBaixo: true,
@@ -295,10 +297,16 @@ const Configuracoes: React.FC = () => {
             <div className="p-6">
               <div className="text-center">
                 <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span className="text-white text-2xl font-medium">MS</span>
+                  <span className="text-white text-2xl font-medium">
+                    {(user?.nomeCompleto || user?.username || 'U').charAt(0).toUpperCase()}
+                  </span>
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900">Marcelo Saraiva</h3>
-                <p className="text-gray-600">Administrador</p>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  {user?.nomeCompleto || user?.username || 'Usuário'}
+                </h3>
+                <p className="text-gray-600">
+                  {user?.tipoDocumento ? user.tipoDocumento.toUpperCase() : 'Usuário'}
+                </p>
                 <button className="mt-4 text-blue-600 hover:text-blue-700 text-sm font-medium">
                   Editar Perfil
                 </button>
