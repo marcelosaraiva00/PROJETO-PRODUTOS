@@ -81,22 +81,22 @@ body {
 
 /* Responsive */
 @media (min-width: 768px) {
-  .md\\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .md\\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .md\\:flex-row { flex-direction: row; }
-  .md\\:items-center { align-items: center; }
-  .md\\:space-x-4 > * + * { margin-left: 1rem; }
-  .md\\:space-y-0 > * + * { margin-top: 0; }
+  .md:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .md:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .md:flex-row { flex-direction: row; }
+  .md:items-center { align-items: center; }
+  .md:space-x-4 > * + * { margin-left: 1rem; }
+  .md:space-y-0 > * + * { margin-top: 0; }
 }
 
 @media (min-width: 1024px) {
-  .lg\\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .lg\\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .lg\\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-  .lg\\:hidden { display: none; }
-  .lg\\:block { display: block; }
-  .lg\\:ml-0 { margin-left: 0; }
-  .lg\\:p-8 { padding: 2rem; }
+  .lg:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .lg:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .lg:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .lg:hidden { display: none; }
+  .lg:block { display: block; }
+  .lg:ml-0 { margin-left: 0; }
+  .lg:p-8 { padding: 2rem; }
 }
 
 /* Spacing */
@@ -216,7 +216,6 @@ body {
 .left-0 { left: 0; }
 .right-1 { right: 0.25rem; }
 .top-1 { top: 0.25rem; }
-.top-1\\/2 { top: 50%; }
 .inset-0 { top: 0; right: 0; bottom: 0; left: 0; }
 .z-30 { z-index: 30; }
 .z-40 { z-index: 40; }
@@ -266,7 +265,6 @@ body {
 /* Transforms */
 .transform { transform: translateZ(0); }
 .-translate-x-full { transform: translateX(-100%); }
-.-translate-y-1\\/2 { transform: translateY(-50%); }
 .translate-x-0 { transform: translateX(0); }
 
 /* Transitions */
@@ -278,25 +276,25 @@ body {
 .ease-in-out { transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); }
 
 /* Hover states */
-.hover\\:bg-gray-100:hover { background-color: var(--bg-secondary); }
-.hover\\:bg-gray-200:hover { background-color: #e5e7eb; }
-.hover\\:bg-blue-50:hover { background-color: #eff6ff; }
-.hover\\:bg-blue-100:hover { background-color: #dbeafe; }
-.hover\\:bg-blue-700:hover { background-color: #1d4ed8; }
-.hover\\:bg-blue-800:hover { background-color: #1e40af; }
-.hover\\:text-gray-600:hover { color: var(--text-secondary); }
-.hover\\:text-gray-800:hover { color: var(--text-primary); }
-.hover\\:text-blue-700:hover { color: #1d4ed8; }
-.hover\\:text-blue-800:hover { color: #1e40af; }
-.hover\\:text-red-800:hover { color: #991b1b; }
-.hover\\:shadow-md:hover { box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); }
-.hover\\:shadow-lg:hover { box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); }
-.hover\\:scale-105:hover { transform: scale(1.05); }
+.hover\:bg-gray-100:hover { background-color: var(--bg-secondary); }
+.hover\:bg-gray-200:hover { background-color: #e5e7eb; }
+.hover\:bg-blue-50:hover { background-color: #eff6ff; }
+.hover\:bg-blue-100:hover { background-color: #dbeafe; }
+.hover\:bg-blue-700:hover { background-color: #1d4ed8; }
+.hover\:bg-blue-800:hover { background-color: #1e40af; }
+.hover\:text-gray-600:hover { color: var(--text-secondary); }
+.hover\:text-gray-800:hover { color: var(--text-primary); }
+.hover\:text-blue-700:hover { color: #1d4ed8; }
+.hover\:text-blue-800:hover { color: #1e40af; }
+.hover\:text-red-800:hover { color: #991b1b; }
+.hover\:shadow-md:hover { box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); }
+.hover\:shadow-lg:hover { box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); }
+.hover\:scale-105:hover { transform: scale(1.05); }
 
 /* Focus states */
-.focus\\:ring-2:focus { box-shadow: 0 0 0 2px rgb(59 130 246 / 0.5); }
-.focus\\:ring-blue-500:focus { box-shadow: 0 0 0 2px rgb(59 130 246 / 0.5); }
-.focus\\:border-blue-500:focus { border-color: #3b82f6; }
+.focus\:ring-2:focus { box-shadow: 0 0 0 2px rgb(59 130 246 / 0.5); }
+.focus\:ring-blue-500:focus { box-shadow: 0 0 0 2px rgb(59 130 246 / 0.5); }
+.focus\:border-blue-500:focus { border-color: #3b82f6; }
 
 /* Background gradients */
 .bg-gradient-to-r { background-image: linear-gradient(to right, var(--tw-gradient-stops)); }
@@ -353,16 +351,16 @@ body {
 .appearance-none { appearance: none; }
 
 /* File input styles */
-.file\\:mr-4 input[type="file"]::file-selector-button { margin-right: 1rem; }
-.file\\:py-2 input[type="file"]::file-selector-button { padding-top: 0.5rem; padding-bottom: 0.5rem; }
-.file\\:px-4 input[type="file"]::file-selector-button { padding-left: 1rem; padding-right: 1rem; }
-.file\\:rounded-lg input[type="file"]::file-selector-button { border-radius: 0.5rem; }
-.file\\:border-0 input[type="file"]::file-selector-button { border: 0; }
-.file\\:text-sm input[type="file"]::file-selector-button { font-size: 0.875rem; }
-.file\\:font-medium input[type="file"]::file-selector-button { font-weight: 500; }
-.file\\:bg-blue-50 input[type="file"]::file-selector-button { background-color: #eff6ff; }
-.file\\:text-blue-700 input[type="file"]::file-selector-button { color: #1d4ed8; }
-.hover\\:file\\:bg-blue-100:hover input[type="file"]::file-selector-button { background-color: #dbeafe; }
+.file\:mr-4 input[type="file"]::file-selector-button { margin-right: 1rem; }
+.file\:py-2 input[type="file"]::file-selector-button { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+.file\:px-4 input[type="file"]::file-selector-button { padding-left: 1rem; padding-right: 1rem; }
+.file\:rounded-lg input[type="file"]::file-selector-button { border-radius: 0.5rem; }
+.file\:border-0 input[type="file"]::file-selector-button { border: 0; }
+.file\:text-sm input[type="file"]::file-selector-button { font-size: 0.875rem; }
+.file\:font-medium input[type="file"]::file-selector-button { font-weight: 500; }
+.file\:bg-blue-50 input[type="file"]::file-selector-button { background-color: #eff6ff; }
+.file\:text-blue-700 input[type="file"]::file-selector-button { color: #1d4ed8; }
+.hover\:file\:bg-blue-100:hover input[type="file"]::file-selector-button { background-color: #dbeafe; }
 
 /* Animations */
 .animate-spin { animation: spin 1s linear infinite; }

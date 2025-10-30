@@ -6,7 +6,7 @@
  * 
  * Funcionalidades:
  * - Gerenciamento de estado do usuário logado
- * - Persistência de token e dados no localStorage
+ * - Persistência de dados no localStorage
  * - Redirecionamento automático após login/logout
  * - Validação de autenticação
  */
@@ -52,8 +52,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const navigate = useNavigate();                                 // Hook para navegação
 
   /**
-   * Efeito para carregar dados de autenticação do localStorage na inicialização
-   * Verifica se existe token e dados do usuário salvos localmente
+   * Efeito para verificar autenticação na inicialização
+   * Restaura dados do localStorage ao recarregar a página
    */
   useEffect(() => {
     const storedToken = localStorage.getItem('token');

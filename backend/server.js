@@ -286,12 +286,17 @@ app.get('/api/users/me', authenticateToken, async (req, res) => {
   try {
     // Buscar dados completos do usuário no banco de dados
     const user = await getOneQuery(
-      'SELECT id, username, nomeCompleto, documento, tipoDocumento, dataCadastro, isAdmin, isApproved, approvedAt FROM users WHERE id = ?',
+      'SELECT id, username, nomeCompleto, documento, tipoDocumento, dataCadastro, isAdmin, isApproved, isBlocked, blockReason, blockedAt, approvedAt FROM users WHERE id = ?',
       [req.user.id]
     );
     
     if (!user) {
       return res.status(404).json({ error: 'Usuário não encontrado' });
+    }
+    
+    // Verificar se usuário está bloqueado
+    if (user.isBlocked) {
+      return res.status(403).json({ error: 'Usuário bloqueado', blockReason: user.blockReason || 'Bloqueado temporariamente' });
     }
     
     res.json(user);
@@ -512,7 +517,7 @@ app.get('/api/admin/users', authenticateToken, requireAdmin, async (req, res) =>
   try {
     const users = await getQuery(
       `SELECT id, username, nomeCompleto, documento, tipoDocumento, dataCadastro, 
-              isAdmin, isApproved, approvedAt, createdAt 
+              isAdmin, isApproved, isBlocked, blockReason, blockedAt, approvedAt, createdAt 
        FROM users 
        ORDER BY createdAt DESC`
     );
@@ -521,6 +526,116 @@ app.get('/api/admin/users', authenticateToken, requireAdmin, async (req, res) =>
   } catch (error) {
     console.error('Erro ao buscar usuários:', error);
     res.status(500).json({ error: 'Erro ao buscar usuários' });
+  }
+});
+
+/**
+ * POST /api/admin/users/:id/block - Bloquear usuário temporariamente
+ * Apenas administradores podem bloquear usuários
+ */
+app.post('/api/admin/users/:id/block', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { reason } = req.body;
+    
+    // Verificar se o usuário existe
+    const user = await getOneQuery('SELECT * FROM users WHERE id = ?', [id]);
+    if (!user) {
+      return res.status(404).json({ error: 'Usuário não encontrado' });
+    }
+    
+    // Verificar se é admin (não pode bloquear outro admin)
+    if (user.isAdmin) {
+      return res.status(403).json({ error: 'Não é possível bloquear um administrador' });
+    }
+    
+    // Bloquear o usuário
+    await runQuery(
+      'UPDATE users SET isBlocked = 1, blockReason = ?, blockedAt = ? WHERE id = ?',
+      [reason || 'Bloqueado temporariamente por falta de pagamento', new Date().toISOString(), id]
+    );
+    
+    res.json({ 
+      message: `Usuário ${user.username} bloqueado com sucesso`,
+      user: {
+        id: user.id,
+        username: user.username,
+        nomeCompleto: user.nomeCompleto
+      }
+    });
+  } catch (error) {
+    console.error('Erro ao bloquear usuário:', error);
+    res.status(500).json({ error: 'Erro ao bloquear usuário' });
+  }
+});
+
+/**
+ * POST /api/admin/users/:id/unblock - Desbloquear usuário
+ * Apenas administradores podem desbloquear usuários
+ */
+app.post('/api/admin/users/:id/unblock', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Verificar se o usuário existe
+    const user = await getOneQuery('SELECT * FROM users WHERE id = ?', [id]);
+    if (!user) {
+      return res.status(404).json({ error: 'Usuário não encontrado' });
+    }
+    
+    // Desbloquear o usuário
+    await runQuery(
+      'UPDATE users SET isBlocked = 0, blockReason = NULL, blockedAt = NULL WHERE id = ?',
+      [id]
+    );
+    
+    res.json({ 
+      message: `Usuário ${user.username} desbloqueado com sucesso`,
+      user: {
+        id: user.id,
+        username: user.username,
+        nomeCompleto: user.nomeCompleto
+      }
+    });
+  } catch (error) {
+    console.error('Erro ao desbloquear usuário:', error);
+    res.status(500).json({ error: 'Erro ao desbloquear usuário' });
+  }
+});
+
+/**
+ * DELETE /api/admin/users/:id - Deletar usuário permanentemente
+ * Apenas administradores podem deletar usuários
+ */
+app.delete('/api/admin/users/:id', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Verificar se o usuário existe
+    const user = await getOneQuery('SELECT * FROM users WHERE id = ?', [id]);
+    if (!user) {
+      return res.status(404).json({ error: 'Usuário não encontrado' });
+    }
+    
+    // Verificar se é admin (não pode deletar outro admin)
+    if (user.isAdmin) {
+      return res.status(403).json({ error: 'Não é possível deletar um administrador' });
+    }
+    
+    // Deletar o usuário (cascade vai remover produtos e vendas relacionados)
+    await runQuery('DELETE FROM users WHERE id = ?', [id]);
+    
+    res.json({ 
+      message: `Usuário ${user.username} foi deletado permanentemente do sistema`,
+      user: {
+        id: user.id,
+        username: user.username,
+        nomeCompleto: user.nomeCompleto
+      }
+    });
+  } catch (error) {
+    console.error('Erro ao deletar usuário:', error);
+    res.status(500).json({ error: 'Erro ao deletar usuário' });
   }
 });
 

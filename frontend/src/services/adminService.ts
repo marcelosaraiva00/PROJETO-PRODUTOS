@@ -49,4 +49,35 @@ export const adminService = {
     const response = await api.get('/admin/users');
     return response.data;
   },
+
+  /**
+   * Bloquear usuário temporariamente
+   * @param userId - ID do usuário a ser bloqueado
+   * @param reason - Motivo do bloqueio
+   * @returns Promise<{ message: string; user: any }> - Resposta do bloqueio
+   */
+  blockUser: async (userId: string, reason?: string): Promise<{ message: string; user: any }> => {
+    const response = await api.post(`/admin/users/${userId}/block`, { reason });
+    return response.data;
+  },
+
+  /**
+   * Desbloquear usuário
+   * @param userId - ID do usuário a ser desbloqueado
+   * @returns Promise<{ message: string; user: any }> - Resposta do desbloqueio
+   */
+  unblockUser: async (userId: string): Promise<{ message: string; user: any }> => {
+    const response = await api.post(`/admin/users/${userId}/unblock`);
+    return response.data;
+  },
+
+  /**
+   * Deletar usuário permanentemente
+   * @param userId - ID do usuário a ser deletado
+   * @returns Promise<{ message: string; user: any }> - Resposta da deleção
+   */
+  deleteUser: async (userId: string): Promise<{ message: string; user: any }> => {
+    const response = await api.delete(`/admin/users/${userId}`);
+    return response.data;
+  },
 };

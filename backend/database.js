@@ -52,6 +52,9 @@ const createTables = () => {
         dataCadastro TEXT NOT NULL,
         isAdmin BOOLEAN DEFAULT 0,
         isApproved BOOLEAN DEFAULT 0,
+        isBlocked BOOLEAN DEFAULT 0,
+        blockReason TEXT,
+        blockedAt TEXT,
         approvedBy TEXT,
         approvedAt TEXT,
         createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -213,8 +216,8 @@ const createFirstAdmin = () => {
 };
 
 /**
- * Atualizar usuários existentes para incluir campos de aprovação
- * Adiciona campos isAdmin, isApproved, approvedBy, approvedAt se não existirem
+ * Atualizar usuários existentes para incluir campos de aprovação e bloqueio
+ * Adiciona campos isAdmin, isApproved, isBlocked, approvedBy, approvedAt, blockReason, blockedAt se não existirem
  */
 const updateExistingUsers = () => {
   return new Promise((resolve, reject) => {
@@ -227,51 +230,60 @@ const updateExistingUsers = () => {
       
       const hasIsAdmin = columns.some(col => col.name === 'isAdmin');
       const hasIsApproved = columns.some(col => col.name === 'isApproved');
+      const hasIsBlocked = columns.some(col => col.name === 'isBlocked');
       
-      if (!hasIsAdmin || !hasIsApproved) {
-        // Adicionar colunas se não existirem
-        const alterQueries = [];
-        
-        if (!hasIsAdmin) {
-          alterQueries.push('ALTER TABLE users ADD COLUMN isAdmin BOOLEAN DEFAULT 0');
-        }
-        
-        if (!hasIsApproved) {
-          alterQueries.push('ALTER TABLE users ADD COLUMN isApproved BOOLEAN DEFAULT 0');
-        }
-        
-        if (!columns.some(col => col.name === 'approvedBy')) {
-          alterQueries.push('ALTER TABLE users ADD COLUMN approvedBy TEXT');
-        }
-        
-        if (!columns.some(col => col.name === 'approvedAt')) {
-          alterQueries.push('ALTER TABLE users ADD COLUMN approvedAt TEXT');
-        }
-        
-        // Executar alterações
-        let completed = 0;
-        if (alterQueries.length === 0) {
-          resolve();
-          return;
-        }
-        
-        alterQueries.forEach((query, index) => {
-          db.run(query, (err) => {
-            if (err) {
-              console.log(`Campo já existe ou erro: ${query}`);
-            } else {
-              console.log(`✅ Campo adicionado: ${query}`);
-            }
-            
-            completed++;
-            if (completed === alterQueries.length) {
-              resolve();
-            }
-          });
-        });
-      } else {
-        resolve();
+      // Adicionar colunas se não existirem
+      const alterQueries = [];
+      
+      if (!hasIsAdmin) {
+        alterQueries.push('ALTER TABLE users ADD COLUMN isAdmin BOOLEAN DEFAULT 0');
       }
+      
+      if (!hasIsApproved) {
+        alterQueries.push('ALTER TABLE users ADD COLUMN isApproved BOOLEAN DEFAULT 0');
+      }
+      
+      if (!hasIsBlocked) {
+        alterQueries.push('ALTER TABLE users ADD COLUMN isBlocked BOOLEAN DEFAULT 0');
+      }
+      
+      if (!columns.some(col => col.name === 'blockReason')) {
+        alterQueries.push('ALTER TABLE users ADD COLUMN blockReason TEXT');
+      }
+      
+      if (!columns.some(col => col.name === 'blockedAt')) {
+        alterQueries.push('ALTER TABLE users ADD COLUMN blockedAt TEXT');
+      }
+      
+      if (!columns.some(col => col.name === 'approvedBy')) {
+        alterQueries.push('ALTER TABLE users ADD COLUMN approvedBy TEXT');
+      }
+      
+      if (!columns.some(col => col.name === 'approvedAt')) {
+        alterQueries.push('ALTER TABLE users ADD COLUMN approvedAt TEXT');
+      }
+      
+      // Executar alterações
+      let completed = 0;
+      if (alterQueries.length === 0) {
+        resolve();
+        return;
+      }
+      
+      alterQueries.forEach((query, index) => {
+        db.run(query, (err) => {
+          if (err) {
+            console.log(`Campo já existe ou erro: ${query}`);
+          } else {
+            console.log(`✅ Campo adicionado: ${query}`);
+          }
+          
+          completed++;
+          if (completed === alterQueries.length) {
+            resolve();
+          }
+        });
+      });
     });
   });
 };
