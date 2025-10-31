@@ -4,13 +4,16 @@ import {
   TrendingUp, 
   DollarSign,
   Package,
-  Download,
-  Calendar
+  Calendar,
+  FileDown
 } from 'lucide-react';
 import { Produto } from '../types/Produto';
 import { produtoService } from '../services/api';
+import { useAuth } from '../context/AuthContext';
+import jsPDF from 'jspdf';
 
 const Relatorios: React.FC = () => {
+  const { user } = useAuth();
   const [produtos, setProdutos] = useState<Produto[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filtroPeriodo, setFiltroPeriodo] = useState<'todos' | 'mes' | 'semana'>('todos');
@@ -95,6 +98,191 @@ const Relatorios: React.FC = () => {
     }).format(value);
   };
 
+  const exportarPDF = () => {
+    const estatisticasPDF = getEstatisticasRelatorio();
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    
+    // Configurações
+    const pageWidth = 210;
+    const pageHeight = 297;
+    let yPosition = 20;
+    
+    // Cores
+    pdf.setDrawColor(37, 99, 235); // Blue-600
+    pdf.setFillColor(37, 99, 235);
+    
+    // Cabeçalho
+    pdf.setFontSize(24);
+    pdf.setTextColor(37, 99, 235);
+    pdf.text('Relatório de Estoque', pageWidth / 2, yPosition, { align: 'center' });
+    yPosition += 10;
+    
+    pdf.setFontSize(11);
+    pdf.setTextColor(107, 114, 128);
+    pdf.text(
+      `Gerado em: ${new Date().toLocaleString('pt-BR')}`,
+      pageWidth / 2,
+      yPosition,
+      { align: 'center' }
+    );
+    yPosition += 8;
+    
+    pdf.text(
+      `Usuário: ${user?.nomeCompleto || 'N/A'}`,
+      pageWidth / 2,
+      yPosition,
+      { align: 'center' }
+    );
+    yPosition += 8;
+    
+    pdf.text(
+      `Período: ${
+        filtroPeriodo === 'todos' ? 'Todos os períodos' :
+        filtroPeriodo === 'semana' ? 'Última semana' :
+        'Último mês'
+      }`,
+      pageWidth / 2,
+      yPosition,
+      { align: 'center' }
+    );
+    yPosition += 15;
+    
+    // Linha divisória
+    pdf.setDrawColor(229, 231, 235);
+    pdf.line(20, yPosition, pageWidth - 20, yPosition);
+    yPosition += 10;
+    
+    // Estatísticas principais
+    pdf.setFontSize(16);
+    pdf.setTextColor(31, 41, 55);
+    pdf.text('Resumo Financeiro', 20, yPosition);
+    yPosition += 12;
+    
+    pdf.setFontSize(10);
+    pdf.setTextColor(0, 0, 0);
+    
+    // Cards de estatísticas
+    const cardWidth = 85;
+    const cardHeight = 40;
+    const cardsPerRow = 2;
+    const cards: Array<{label: string, value: string}> = [
+      { label: 'Total de Produtos', value: estatisticasPDF.totalProdutos.toString() },
+      { label: 'Valor em Estoque', value: formatCurrency(estatisticasPDF.valorTotalEstoque) },
+      { label: 'Valor Potencial', value: formatCurrency(estatisticasPDF.valorPotencialVendas) },
+      { label: 'Margem Total', value: formatCurrency(estatisticasPDF.margemTotal) }
+    ];
+    
+    for (let i = 0; i < cards.length; i++) {
+      const row = Math.floor(i / cardsPerRow);
+      const col = i % cardsPerRow;
+      const x = 20 + col * 95;
+      const y = yPosition + row * 45;
+      
+      // Card
+      pdf.setDrawColor(229, 231, 235);
+      pdf.setFillColor(255, 255, 255);
+      pdf.roundedRect(x, y, cardWidth, cardHeight, 3, 3, 'FD');
+      
+      // Label
+      pdf.setFontSize(9);
+      pdf.setTextColor(107, 114, 128);
+      pdf.text(cards[i].label, x + 5, y + 8);
+      
+      // Value
+      pdf.setFontSize(12);
+      pdf.setTextColor(31, 41, 55);
+      pdf.text(cards[i].value, x + 5, y + 20, { maxWidth: cardWidth - 10 });
+    }
+    
+    yPosition += cardHeight * 2 + 15;
+    
+    // Verificar se precisa de nova página
+    if (yPosition > pageHeight - 50) {
+      pdf.addPage();
+      yPosition = 20;
+    }
+    
+    // Top Produtos por Margem
+    if (estatisticasPDF.produtosComMargem.length > 0) {
+      pdf.setFontSize(16);
+      pdf.setTextColor(31, 41, 55);
+      pdf.text('Top Produtos por Margem', 20, yPosition);
+      yPosition += 10;
+      
+      pdf.setFontSize(9);
+      pdf.setTextColor(107, 114, 128);
+      
+      estatisticasPDF.produtosComMargem.slice(0, 5).forEach((produto, index) => {
+        if (yPosition > pageHeight - 40) {
+          pdf.addPage();
+          yPosition = 20;
+        }
+        
+        pdf.setTextColor(31, 41, 55);
+        pdf.text(`#${index + 1} ${produto.nome}`, 25, yPosition);
+        pdf.setTextColor(34, 197, 94);
+        pdf.text(`+${produto.margemPercentual.toFixed(1)}%`, 170, yPosition, { align: 'right' });
+        
+        yPosition += 8;
+      });
+      
+      yPosition += 10;
+    }
+    
+    // Produtos com Estoque Baixo
+    if (estatisticasPDF.produtosEstoqueBaixo.length > 0) {
+      if (yPosition > pageHeight - 50) {
+        pdf.addPage();
+        yPosition = 20;
+      }
+      
+      pdf.setFontSize(16);
+      pdf.setTextColor(31, 41, 55);
+      pdf.text('Alerta de Estoque', 20, yPosition);
+      yPosition += 10;
+      
+      pdf.setFontSize(9);
+      
+      estatisticasPDF.produtosEstoqueBaixo.forEach((produto) => {
+        if (yPosition > pageHeight - 40) {
+          pdf.addPage();
+          yPosition = 20;
+        }
+        
+        const porcentagem = (produto.quantidadeDisponivel / produto.quantidadeComprada) * 100;
+        pdf.setTextColor(31, 41, 55);
+        pdf.text(produto.nome, 25, yPosition);
+        pdf.setTextColor(220, 38, 38);
+        pdf.text(
+          `${produto.quantidadeDisponivel}/${produto.quantidadeComprada} (${porcentagem.toFixed(1)}%)`,
+          170,
+          yPosition,
+          { align: 'right' }
+        );
+        
+        yPosition += 8;
+      });
+    }
+    
+    // Rodapé
+    const totalPages = pdf.getNumberOfPages();
+    for (let i = 1; i <= totalPages; i++) {
+      pdf.setPage(i);
+      pdf.setFontSize(9);
+      pdf.setTextColor(156, 163, 175);
+      pdf.text(
+        `Página ${i} de ${totalPages}`,
+        pageWidth / 2,
+        pageHeight - 10,
+        { align: 'center' }
+      );
+    }
+    
+    // Download
+    const periodo = filtroPeriodo === 'todos' ? 'completo' : filtroPeriodo === 'semana' ? 'semana' : 'mes';
+    const nomeArquivo = `relatorio_estoque_${periodo}_${new Date().toISOString().split('T')[0]}.pdf`;
+    pdf.save(nomeArquivo);
+  };
 
   const estatisticas = getEstatisticasRelatorio();
 
@@ -128,9 +316,12 @@ const Relatorios: React.FC = () => {
               <option value="mes">Último mês</option>
             </select>
           </div>
-          <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center">
-            <Download className="h-4 w-4 mr-2" />
-            Exportar
+          <button 
+            onClick={exportarPDF}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center shadow-md hover:shadow-lg"
+          >
+            <FileDown className="h-4 w-4 mr-2" />
+            Exportar PDF
           </button>
         </div>
       </div>
