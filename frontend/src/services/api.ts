@@ -11,9 +11,10 @@ import { Produto, NovoProduto } from '../types/Produto';
 /**
  * Configuração do cliente Axios para comunicação com o backend
  * Define URL base e configurações padrão
+ * Em produção, usa a variável de ambiente REACT_APP_API_URL
  */
 const api = axios.create({
-  baseURL: 'http://localhost:5000/api', // URL base da API
+  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:5000/api', // URL base da API
 });
 
 /**

@@ -639,6 +639,26 @@ app.delete('/api/admin/users/:id', authenticateToken, requireAdmin, async (req, 
   }
 });
 
+// ========== SERVE FRONTEND EM PRODUÇÃO ==========
+
+/**
+ * Middleware para servir arquivos estáticos do frontend em produção
+ * Ativa apenas se NODE_ENV estiver definido como 'production'
+ * Deve ser adicionado DEPOIS de todas as rotas API
+ */
+if (process.env.NODE_ENV === 'production') {
+  // Servir arquivos estáticos do build do React
+  app.use(express.static(path.join(__dirname, '../frontend/build')));
+  
+  // Qualquer rota que não seja /api será redirecionada para o index.html
+  // Isso permite que o React Router funcione corretamente
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/build/index.html'));
+  });
+  
+  console.log('📦 Modo PRODUÇÃO: Servindo frontend estático');
+}
+
 // ========== INICIALIZAÇÃO DO SERVIDOR ==========
 
 /**

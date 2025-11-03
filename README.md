@@ -2,6 +2,14 @@
 
 Um sistema completo de gestão de estoque e produtos com controle de vendas, preços e banco de dados SQLite.
 
+## 🌐 Deploy Online
+
+**Quer deixar a aplicação online?** Veja o guia completo:
+- 📖 [COMO-FAZER-DEPLOY.md](COMO-FAZER-DEPLOY.md) - Guia simplificado em português
+- 📚 [DEPLOY.md](DEPLOY.md) - Documentação técnica completa
+
+**Plataformas recomendadas:** Railway, Render, ou VPS (DigitalOcean)
+
 ## 🚀 Funcionalidades
 
 ### ✅ Gestão de Produtos
