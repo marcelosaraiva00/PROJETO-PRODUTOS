@@ -4,9 +4,10 @@ Um sistema completo de gestão de estoque e produtos com controle de vendas, pre
 
 ## 🌐 Deploy Online
 
-**Quer deixar a aplicação online?** Veja o guia completo:
+**Quer deixar a aplicação online?** Veja os guias completos:
 - 📖 [COMO-FAZER-DEPLOY.md](COMO-FAZER-DEPLOY.md) - Guia simplificado em português
 - 📚 [DEPLOY.md](DEPLOY.md) - Documentação técnica completa
+- 🌐 [DOMINIO-CUSTOMIZADO.md](DOMINIO-CUSTOMIZADO.md) - Como configurar domínio (estoquefacil.com.br)
 
 **Plataformas recomendadas:** Railway, Render, ou VPS (DigitalOcean)
 
