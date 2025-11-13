@@ -66,6 +66,7 @@ const createTables = () => {
         id TEXT PRIMARY KEY,
         userId TEXT NOT NULL,
         nome TEXT NOT NULL,
+        fornecedor TEXT,
         precoCompra REAL NOT NULL,
         precoSugeridoVenda REAL NOT NULL,
         quantidadeComprada INTEGER NOT NULL,
@@ -118,6 +119,7 @@ const createTables = () => {
           if (completed === total) {
             // Inserir configuração padrão de margem de lucro
             insertDefaultSettings()
+              .then(() => ensureProdutoFornecedorColumn())
               .then(() => resolve())
               .catch(reject);
           }
@@ -165,6 +167,34 @@ const insertDefaultSettings = () => {
           }
         }
       );
+    });
+  });
+};
+
+/**
+ * Garantir coluna fornecedor na tabela produtos
+ */
+const ensureProdutoFornecedorColumn = () => {
+  return new Promise((resolve, reject) => {
+    db.all('PRAGMA table_info(produtos)', (err, columns) => {
+      if (err) {
+        console.error('Erro ao verificar colunas de produtos:', err.message);
+        return reject(err);
+      }
+
+      const hasFornecedor = columns.some((column) => column.name === 'fornecedor');
+      if (hasFornecedor) {
+        return resolve();
+      }
+
+      db.run('ALTER TABLE produtos ADD COLUMN fornecedor TEXT', (alterErr) => {
+        if (alterErr && !alterErr.message.includes('duplicate column name')) {
+          console.error('Erro ao adicionar coluna fornecedor:', alterErr.message);
+          return reject(alterErr);
+        }
+
+        resolve();
+      });
     });
   });
 };

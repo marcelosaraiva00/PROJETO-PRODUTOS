@@ -24,8 +24,10 @@ const Produtos: React.FC = () => {
 
     // Filtrar por termo de busca
     if (searchTerm) {
+      const normalizedTerm = searchTerm.toLowerCase();
       filtered = filtered.filter((produto: Produto) =>
-        produto.nome.toLowerCase().includes(searchTerm.toLowerCase())
+        produto.nome.toLowerCase().includes(normalizedTerm) ||
+        (produto.fornecedor ? produto.fornecedor.toLowerCase().includes(normalizedTerm) : false)
       );
     }
 

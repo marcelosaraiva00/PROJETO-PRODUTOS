@@ -56,11 +56,18 @@ const buscarProduto = async (req, res) => {
  */
 const cadastrarProduto = async (req, res) => {
   try {
-    const { nome, precoCompra, quantidadeComprada } = req.body;
+    const { nome, precoCompra, quantidadeComprada, fornecedor } = req.body;
     
     // Validar campos obrigatórios
     if (!nome || !precoCompra || !quantidadeComprada) {
       return res.status(400).json({ error: 'Nome, preço de compra e quantidade são obrigatórios' });
+    }
+
+    const precoCompraNumber = parseFloat(precoCompra);
+    const quantidadeCompradaNumber = parseInt(quantidadeComprada, 10);
+
+    if (Number.isNaN(precoCompraNumber) || Number.isNaN(quantidadeCompradaNumber)) {
+      return res.status(400).json({ error: 'Preço de compra e quantidade devem ser numéricos' });
     }
     
     // Obter margem de lucro atual
@@ -68,7 +75,7 @@ const cadastrarProduto = async (req, res) => {
     const profitMargin = config ? parseFloat(config.valor) : 0.5;
     
     // Calcular preço sugerido
-    const precoSugeridoVenda = precoCompra * (1 + profitMargin);
+    const precoSugeridoVenda = precoCompraNumber * (1 + profitMargin);
     
     // Gerar ID único para o produto
     const produtoId = uuidv4();
@@ -78,9 +85,20 @@ const cadastrarProduto = async (req, res) => {
     
     // Inserir produto no banco de dados
     await runQuery(
-      `INSERT INTO produtos (id, userId, nome, precoCompra, precoSugeridoVenda, quantidadeComprada, quantidadeDisponivel, imagem, dataCadastro) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [produtoId, req.user.id, nome, precoCompra, precoSugeridoVenda, quantidadeComprada, quantidadeComprada, imagem, new Date().toISOString()]
+      `INSERT INTO produtos (id, userId, nome, fornecedor, precoCompra, precoSugeridoVenda, quantidadeComprada, quantidadeDisponivel, imagem, dataCadastro) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        produtoId,
+        req.user.id,
+        nome,
+        fornecedor ? fornecedor.trim() : null,
+        precoCompraNumber,
+        precoSugeridoVenda,
+        quantidadeCompradaNumber,
+        quantidadeCompradaNumber,
+        imagem,
+        new Date().toISOString()
+      ]
     );
     
     // Buscar produto criado para retornar
@@ -100,7 +118,7 @@ const cadastrarProduto = async (req, res) => {
 const atualizarProduto = async (req, res) => {
   try {
     const { id } = req.params;
-    const { nome, precoCompra, quantidadeComprada } = req.body;
+    const { nome, precoCompra, quantidadeComprada, fornecedor } = req.body;
     
     // Verificar se o produto existe e pertence ao usuário
     const produtoExistente = await getOneQuery(
@@ -117,16 +135,25 @@ const atualizarProduto = async (req, res) => {
     const profitMargin = config ? parseFloat(config.valor) : 0.5;
     
     // Calcular novo preço sugerido
-    const precoSugeridoVenda = precoCompra * (1 + profitMargin);
+    const nomeAtualizado = nome ?? produtoExistente.nome;
+    const precoCompraAtualizado = precoCompra !== undefined ? parseFloat(precoCompra) : produtoExistente.precoCompra;
+    const quantidadeCompradaAtualizada = quantidadeComprada !== undefined ? parseInt(quantidadeComprada, 10) : produtoExistente.quantidadeComprada;
+    const fornecedorAtualizado = fornecedor !== undefined ? (fornecedor.trim() || null) : produtoExistente.fornecedor;
+
+    if (Number.isNaN(precoCompraAtualizado) || Number.isNaN(quantidadeCompradaAtualizada)) {
+      return res.status(400).json({ error: 'Preço de compra e quantidade devem ser numéricos' });
+    }
+
+    const precoSugeridoVenda = precoCompraAtualizado * (1 + profitMargin);
     
     // Calcular nova quantidade disponível (mantém proporção)
     const proporcaoAnterior = produtoExistente.quantidadeDisponivel / produtoExistente.quantidadeComprada;
-    const novaQuantidadeDisponivel = Math.floor(quantidadeComprada * proporcaoAnterior);
+    const novaQuantidadeDisponivel = Math.floor(quantidadeCompradaAtualizada * proporcaoAnterior);
     
     // Atualizar produto no banco de dados
     await runQuery(
-      `UPDATE produtos SET nome = ?, precoCompra = ?, precoSugeridoVenda = ?, quantidadeComprada = ?, quantidadeDisponivel = ? WHERE id = ?`,
-      [nome, precoCompra, precoSugeridoVenda, quantidadeComprada, novaQuantidadeDisponivel, id]
+      `UPDATE produtos SET nome = ?, fornecedor = ?, precoCompra = ?, precoSugeridoVenda = ?, quantidadeComprada = ?, quantidadeDisponivel = ? WHERE id = ?`,
+      [nomeAtualizado, fornecedorAtualizado, precoCompraAtualizado, precoSugeridoVenda, quantidadeCompradaAtualizada, novaQuantidadeDisponivel, id]
     );
     
     // Buscar produto atualizado para retornar
