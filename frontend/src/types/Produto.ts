@@ -12,7 +12,6 @@
 export interface Produto {
   id: string;                    // Identificador único do produto
   nome: string;                  // Nome do produto
-  fornecedor: string | null;     // Nome do fornecedor (opcional)
   precoCompra: number;          // Preço de compra do produto
   precoSugeridoVenda: number;   // Preço sugerido calculado automaticamente
   quantidadeComprada: number;   // Quantidade total comprada
@@ -27,7 +26,6 @@ export interface Produto {
  */
 export interface NovoProduto {
   nome: string;        // Nome do produto (obrigatório)
-  fornecedor?: string; // Fornecedor do produto (opcional)
   precoCompra: number; // Preço de compra (obrigatório)
   quantidadeComprada: number; // Quantidade comprada (obrigatório)
   imagem?: File;      // Arquivo de imagem (opcional)

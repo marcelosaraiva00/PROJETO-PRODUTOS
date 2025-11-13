@@ -33,7 +33,6 @@ const ProdutoForm: React.FC<ProdutoFormProps> = ({
   // Estados do formulário
   const [formData, setFormData] = useState({
     nome: '',
-    fornecedor: '',
     precoCompra: '',
     quantidadeComprada: '',
   });
@@ -47,7 +46,6 @@ const ProdutoForm: React.FC<ProdutoFormProps> = ({
     if (produto) {
       setFormData({
         nome: produto.nome,
-        fornecedor: produto.fornecedor ?? '',
         precoCompra: produto.precoCompra.toString(),
         quantidadeComprada: produto.quantidadeComprada.toString(),
       });
@@ -55,7 +53,6 @@ const ProdutoForm: React.FC<ProdutoFormProps> = ({
     } else {
       setFormData({
         nome: '',
-        fornecedor: '',
         precoCompra: '',
         quantidadeComprada: '',
       });
@@ -103,7 +100,6 @@ const ProdutoForm: React.FC<ProdutoFormProps> = ({
 
     const novoProduto: NovoProduto = {
       nome: formData.nome,
-      fornecedor: formData.fornecedor.trim(),
       precoCompra: parseFloat(formData.precoCompra),
       quantidadeComprada: parseInt(formData.quantidadeComprada),
       imagem: imagem || undefined,
@@ -166,22 +162,6 @@ const ProdutoForm: React.FC<ProdutoFormProps> = ({
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
               placeholder="Digite o nome do produto"
               required
-            />
-          </div>
-
-          {/* Campo fornecedor */}
-          <div>
-            <label htmlFor="fornecedor" className="block text-sm font-medium text-gray-700 mb-2">
-              Fornecedor
-            </label>
-            <input
-              type="text"
-              id="fornecedor"
-              name="fornecedor"
-              value={formData.fornecedor}
-              onChange={handleInputChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-              placeholder="Informe o fornecedor do produto"
             />
           </div>
 

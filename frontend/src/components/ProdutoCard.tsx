@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Package, Edit, Trash2, DollarSign, Building2 } from 'lucide-react';
+import { Package, Edit, Trash2, DollarSign } from 'lucide-react';
 import { Produto } from '../types/Produto';
 
 /**
@@ -60,12 +60,6 @@ const ProdutoCard: React.FC<ProdutoCardProps> = ({ produto, onEdit, onDelete }) 
             <h3 className="text-lg font-semibold text-gray-900 mb-2">
               {produto.nome}
             </h3>
-            {produto.fornecedor && (
-              <div className="flex items-center text-sm text-gray-500 mb-2">
-                <Building2 className="h-4 w-4 mr-1" />
-                Fornecedor: {produto.fornecedor}
-              </div>
-            )}
             <div className="flex items-center text-sm text-gray-500 mb-2">
               <Package className="h-4 w-4 mr-1" />
               Cadastrado em: {formatDate(produto.dataCadastro)}

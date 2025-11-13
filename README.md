@@ -8,12 +8,8 @@ Um sistema completo de gestão de estoque e produtos com controle de vendas, pre
 - 📖 [COMO-FAZER-DEPLOY.md](COMO-FAZER-DEPLOY.md) - Guia simplificado em português
 - 📚 [DEPLOY.md](DEPLOY.md) - Documentação técnica completa
 - 🌐 [DOMINIO-CUSTOMIZADO.md](DOMINIO-CUSTOMIZADO.md) - Como configurar domínio (estoquefacil.com.br)
-- 🏠 [HOSPEDAGEM-COMPARTILHADA.md](HOSPEDAGEM-COMPARTILHADA.md) - Guia para HostGator e hospedagem compartilhada
-- 📁 [ESTRUTURA-HOSTGATOR.md](ESTRUTURA-HOSTGATOR.md) - Estrutura de arquivos e qual página exibir
 
 **Plataformas recomendadas:** Railway, Render, ou VPS (DigitalOcean)
-
-**⚠️ HostGator Compartilhado:** Não suporta Node.js. Use VPS ou plataformas como Railway/Render.
 
 ## 🚀 Funcionalidades
 
