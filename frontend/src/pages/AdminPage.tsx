@@ -203,8 +203,8 @@ const AdminPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header com gradiente */}
-        <div className="mb-8 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl shadow-xl p-8 text-white">
+        {/* Header */}
+        <div className="mb-8 bg-blue-600 rounded-2xl shadow-xl p-8 text-white">
           <div className="flex items-center justify-between">
             <div>
               <div className="flex items-center mb-2">
@@ -302,7 +302,7 @@ const AdminPage: React.FC = () => {
               onClick={() => setActiveTab('pending')}
               className={`flex-1 flex items-center justify-center py-3 px-4 rounded-lg font-medium text-sm transition-all duration-200 ${
                 activeTab === 'pending'
-                  ? 'bg-gradient-to-r from-yellow-500 to-orange-500 text-white shadow-lg'
+                  ? 'bg-yellow-500 text-white shadow-lg hover:bg-yellow-600'
                   : 'text-gray-600 hover:bg-gray-100'
               }`}
             >
@@ -318,7 +318,7 @@ const AdminPage: React.FC = () => {
               onClick={() => setActiveTab('all')}
               className={`flex-1 flex items-center justify-center py-3 px-4 rounded-lg font-medium text-sm transition-all duration-200 ${
                 activeTab === 'all'
-                  ? 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-lg'
+                  ? 'bg-blue-600 text-white shadow-lg hover:bg-blue-700'
                   : 'text-gray-600 hover:bg-gray-100'
               }`}
             >
@@ -357,7 +357,7 @@ const AdminPage: React.FC = () => {
                 ) : (
                   <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gradient-to-r from-yellow-400 to-orange-400">
+                      <thead className="bg-yellow-500">
                         <tr>
                           <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">
                             Usuário
@@ -375,10 +375,10 @@ const AdminPage: React.FC = () => {
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
                         {pendingUsers.map((pendingUser, index) => (
-                          <tr key={pendingUser.id} className={`hover:bg-gradient-to-r hover:from-yellow-50 hover:to-orange-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
-                            <td className="px-6 py-5 whitespace-nowrap">
+                          <tr key={pendingUser.id} className={`hover:bg-yellow-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                            <td className="px-6 py-5 align-top">
                               <div className="flex items-center">
-                                <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center text-white font-bold">
+                                <div className="flex-shrink-0 h-10 w-10 rounded-full bg-yellow-500 flex items-center justify-center text-white font-bold">
                                   {pendingUser.username[0].toUpperCase()}
                                 </div>
                                 <div className="ml-4">
@@ -391,7 +391,7 @@ const AdminPage: React.FC = () => {
                                 </div>
                               </div>
                             </td>
-                            <td className="px-6 py-5 whitespace-nowrap">
+                            <td className="px-6 py-5 align-top">
                               <div className="text-sm font-medium text-gray-900">
                                 {formatDocument(pendingUser.documento, pendingUser.tipoDocumento)}
                               </div>
@@ -399,23 +399,23 @@ const AdminPage: React.FC = () => {
                                 {pendingUser.tipoDocumento}
                               </div>
                             </td>
-                            <td className="px-6 py-5 whitespace-nowrap">
+                            <td className="px-6 py-5 align-top">
                               <div className="text-sm text-gray-900">
                                 {formatDate(pendingUser.createdAt)}
                               </div>
                             </td>
-                            <td className="px-6 py-5 whitespace-nowrap text-sm font-medium">
+                            <td className="px-6 py-5 align-top text-sm font-medium">
                               <div className="flex space-x-2">
                                 <button
                                   onClick={() => handleApproveUser(pendingUser.id, pendingUser.username)}
-                                  className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transition-all shadow-md hover:shadow-lg"
+                                  className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition-all shadow-md hover:shadow-lg disabled:bg-green-200 disabled:text-green-700 disabled:opacity-70 disabled:cursor-not-allowed"
                                 >
                                   <CheckCircle className="w-4 h-4 mr-2" />
                                   Aprovar
                                 </button>
                                 <button
                                   onClick={() => handleRejectUser(pendingUser.id, pendingUser.username)}
-                                  className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg hover:from-red-600 hover:to-red-700 transition-all shadow-md hover:shadow-lg"
+                                  className="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition-all shadow-md hover:shadow-lg disabled:bg-red-200 disabled:text-red-700 disabled:opacity-70 disabled:cursor-not-allowed"
                                 >
                                   <XCircle className="w-4 h-4 mr-2" />
                                   Rejeitar
@@ -436,7 +436,7 @@ const AdminPage: React.FC = () => {
               <div className="bg-white shadow-xl rounded-xl overflow-hidden border border-gray-200">
                 <div className="overflow-x-auto">
                   <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gradient-to-r from-blue-500 to-indigo-600">
+                    <thead className="bg-blue-600">
                       <tr>
                         <th className="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider" style={{ width: '25%' }}>
                           Usuário
@@ -457,17 +457,17 @@ const AdminPage: React.FC = () => {
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                       {allUsers.map((user, index) => (
-                        <tr key={user.id} className={`hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
-                          <td className="px-6 py-5 whitespace-nowrap">
+                        <tr key={user.id} className={`hover:bg-blue-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                          <td className="px-6 py-5 align-top">
                             <div className="flex items-center">
-                              <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold">
+                              <div className="flex-shrink-0 h-10 w-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold">
                                 {user.username[0].toUpperCase()}
                               </div>
                               <div className="ml-4">
                                 <div className="text-sm font-bold text-gray-900 flex items-center">
                                   {user.username}
-                                  {user.isAdmin && (
-                                    <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-md">
+                                  {Boolean(user.isAdmin) && (
+                                    <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-purple-600 text-white shadow-md">
                                       <Shield className="w-3 h-3 mr-1" />
                                       Admin
                                     </span>
@@ -479,7 +479,7 @@ const AdminPage: React.FC = () => {
                               </div>
                             </div>
                           </td>
-                          <td className="px-6 py-5 whitespace-nowrap">
+                          <td className="px-6 py-5 align-top">
                             <div className="text-sm font-medium text-gray-900">
                               {formatDocument(user.documento, user.tipoDocumento)}
                             </div>
@@ -487,22 +487,22 @@ const AdminPage: React.FC = () => {
                               {user.tipoDocumento}
                             </div>
                           </td>
-                          <td className="px-6 py-5">
-                            <div className="space-y-2 min-w-[200px]">
+                          <td className="px-6 py-5 align-top">
+                            <div className="flex flex-col items-start gap-2 min-w-[220px]">
                               {user.isApproved ? (
-                                <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-green-500 to-green-600 text-white shadow-md whitespace-nowrap">
+                                <span className="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-semibold bg-green-600 text-white shadow-md">
                                   <CheckCircle className="w-3 h-3 mr-1.5" />
                                   Aprovado
                                 </span>
                               ) : (
-                                <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-yellow-500 to-yellow-600 text-white shadow-md whitespace-nowrap">
+                                <span className="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-semibold bg-yellow-500 text-white shadow-md">
                                   <Clock className="w-3 h-3 mr-1.5" />
                                   Pendente
                                 </span>
                               )}
-                              {user.isBlocked && (
-                                <div className="space-y-1">
-                                  <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-red-500 to-red-600 text-white shadow-md whitespace-nowrap">
+                              {Boolean(user.isBlocked) && (
+                                <div className="flex flex-col gap-1 w-full">
+                                  <span className="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-semibold bg-red-600 text-white shadow-md">
                                     <AlertCircle className="w-3 h-3 mr-1.5" />
                                     Bloqueado
                                   </span>
@@ -513,18 +513,18 @@ const AdminPage: React.FC = () => {
                               )}
                             </div>
                           </td>
-                          <td className="px-6 py-5 whitespace-nowrap">
+                          <td className="px-6 py-5 align-top">
                             <div className="text-sm text-gray-900">
                               {formatDate(user.createdAt)}
                             </div>
                           </td>
-                          <td className="px-6 py-5 whitespace-nowrap text-sm font-medium">
+                          <td className="px-6 py-5 align-top text-sm font-medium">
                             {!user.isAdmin && (
                               <div className="flex space-x-2">
                                 {user.isBlocked ? (
                                   <button
                                     onClick={() => handleUnblockUser(user.id, user.username)}
-                                    className="inline-flex items-center px-3 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transition-all shadow-md hover:shadow-lg"
+                                    className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition-all shadow-md hover:shadow-lg disabled:bg-green-200 disabled:text-green-700 disabled:opacity-70 disabled:cursor-not-allowed"
                                     title="Desbloquear usuário"
                                   >
                                     <Unlock className="w-4 h-4 mr-1" />
@@ -533,7 +533,7 @@ const AdminPage: React.FC = () => {
                                 ) : (
                                   <button
                                     onClick={() => handleBlockUser(user.id, user.username)}
-                                    className="inline-flex items-center px-3 py-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all shadow-md hover:shadow-lg"
+                                    className="inline-flex items-center px-4 py-2 bg-yellow-500 text-white rounded-lg font-semibold hover:bg-yellow-600 transition-all shadow-md hover:shadow-lg disabled:bg-yellow-200 disabled:text-yellow-700 disabled:opacity-70 disabled:cursor-not-allowed"
                                     title="Bloquear usuário"
                                   >
                                     <Ban className="w-4 h-4 mr-1" />
@@ -542,7 +542,7 @@ const AdminPage: React.FC = () => {
                                 )}
                                 <button
                                   onClick={() => handleDeleteUser(user.id, user.username)}
-                                  className="inline-flex items-center px-3 py-2 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 transition-all shadow-md hover:shadow-lg"
+                                  className="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition-all shadow-md hover:shadow-lg disabled:bg-red-200 disabled:text-red-700 disabled:opacity-70 disabled:cursor-not-allowed"
                                   title="Deletar usuário permanentemente"
                                 >
                                   <Trash2 className="w-4 h-4 mr-1" />

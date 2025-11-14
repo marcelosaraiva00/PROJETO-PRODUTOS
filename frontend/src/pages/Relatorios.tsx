@@ -1,11 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   BarChart3, 
   TrendingUp, 
   DollarSign,
   Package,
   Calendar,
-  FileDown
+  FileDown,
+  LineChart,
+  PieChart,
+  AlertTriangle
 } from 'lucide-react';
 import { Produto } from '../types/Produto';
 import { produtoService } from '../services/api';
@@ -98,8 +101,165 @@ const Relatorios: React.FC = () => {
     }).format(value);
   };
 
+  const estatisticas = useMemo(() => getEstatisticasRelatorio(), [produtos, filtroPeriodo]);
+
+  const estoquePorMes = useMemo(() => {
+    if (produtos.length === 0) {
+      return [];
+    }
+
+    const agora = new Date();
+    const meses: Array<{ label: string; valor: number }> = [];
+
+    for (let i = 5; i >= 0; i--) {
+      const referencia = new Date(agora.getFullYear(), agora.getMonth() - i, 1);
+      const labelMes = referencia
+        .toLocaleDateString('pt-BR', { month: 'short' })
+        .replace('.', '')
+        .toUpperCase();
+      const label = `${labelMes}/${String(referencia.getFullYear()).slice(-2)}`;
+
+      const valor = produtos.reduce((total, produto) => {
+        const dataCadastro = new Date(produto.dataCadastro);
+        if (
+          dataCadastro.getFullYear() === referencia.getFullYear() &&
+          dataCadastro.getMonth() === referencia.getMonth()
+        ) {
+          return total + produto.precoCompra * produto.quantidadeDisponivel;
+        }
+        return total;
+      }, 0);
+
+      meses.push({ label, valor });
+    }
+
+    return meses;
+  }, [produtos]);
+
+  const maxValorEstoqueSerie = useMemo(() => {
+    if (estoquePorMes.length === 0) {
+      return 0;
+    }
+
+    return estoquePorMes.reduce((max, item) => Math.max(max, item.valor), 0);
+  }, [estoquePorMes]);
+
+  const distribuicaoEstoque = useMemo(() => {
+    const base = estatisticas.produtosFiltrados;
+
+    if (base.length === 0) {
+      return {
+        counts: { alto: 0, medio: 0, baixo: 0 },
+        percent: { alto: 0, medio: 0, baixo: 0 },
+      };
+    }
+
+    const counts = base.reduce(
+      (acc, produto) => {
+        const porcentagem =
+          produto.quantidadeComprada === 0
+            ? 0
+            : (produto.quantidadeDisponivel / produto.quantidadeComprada) * 100;
+
+        if (porcentagem > 50) {
+          acc.alto += 1;
+        } else if (porcentagem > 20) {
+          acc.medio += 1;
+        } else {
+          acc.baixo += 1;
+        }
+
+        return acc;
+      },
+      { alto: 0, medio: 0, baixo: 0 }
+    );
+
+    const total = base.length;
+
+    return {
+      counts,
+      percent: {
+        alto: Math.round((counts.alto / total) * 100),
+        medio: Math.round((counts.medio / total) * 100),
+        baixo: Math.round((counts.baixo / total) * 100),
+      },
+    };
+  }, [estatisticas.produtosFiltrados]);
+
+  const novosProdutos30Dias = useMemo(() => {
+    const limite = new Date();
+    limite.setDate(limite.getDate() - 30);
+
+    return estatisticas.produtosFiltrados.filter(
+      (produto) => new Date(produto.dataCadastro) >= limite
+    ).length;
+  }, [estatisticas.produtosFiltrados]);
+
+  const margemMedia = useMemo(() => {
+    if (estatisticas.produtosFiltrados.length === 0) {
+      return 0;
+    }
+    return estatisticas.margemTotal / estatisticas.produtosFiltrados.length;
+  }, [estatisticas]);
+
+  const valorMedioEstoque = useMemo(() => {
+    if (estatisticas.produtosFiltrados.length === 0) {
+      return 0;
+    }
+    return estatisticas.valorTotalEstoque / estatisticas.produtosFiltrados.length;
+  }, [estatisticas]);
+
+  const insightsRapidos = [
+    {
+      title: 'Novos produtos (30 dias)',
+      value: novosProdutos30Dias.toString(),
+      description: 'Entradas recentes adicionadas ao estoque',
+      accent: '#2563eb',
+      icon: Package,
+    },
+    {
+      title: 'Estoque crítico',
+      value: estatisticas.produtosEstoqueBaixo.length.toString(),
+      description: 'Itens abaixo de 20% do estoque inicial',
+      accent: '#dc2626',
+      icon: AlertTriangle,
+    },
+    {
+      title: 'Margem média por produto',
+      value: formatCurrency(margemMedia),
+      description: 'Lucro potencial médio por item',
+      accent: '#16a34a',
+      icon: TrendingUp,
+    },
+    {
+      title: 'Valor médio em estoque',
+      value: formatCurrency(valorMedioEstoque),
+      description: 'Investimento por produto disponível',
+      accent: '#9333ea',
+      icon: DollarSign,
+    },
+  ];
+
+  const niveisEstoque = [
+    {
+      key: 'alto' as const,
+      label: 'Estoque Alto (> 50%)',
+      color: '#16a34a',
+    },
+    {
+      key: 'medio' as const,
+      label: 'Estoque Médio (21% - 50%)',
+      color: '#f97316',
+    },
+    {
+      key: 'baixo' as const,
+      label: 'Estoque Baixo (≤ 20%)',
+      color: '#dc2626',
+    },
+  ];
+
   const exportarPDF = () => {
-    const estatisticasPDF = getEstatisticasRelatorio();
+    const estatisticasPDF = estatisticas;
     const pdf = new jsPDF('p', 'mm', 'a4');
     
     // Configurações
@@ -284,8 +444,6 @@ const Relatorios: React.FC = () => {
     pdf.save(nomeArquivo);
   };
 
-  const estatisticas = getEstatisticasRelatorio();
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -403,6 +561,178 @@ const Relatorios: React.FC = () => {
             </span>
           </div>
         </div>
+      </div>
+
+      {/* Visualizações principais */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200">
+        <div className="p-6 border-b border-gray-200">
+          <div className="flex items-start justify-between">
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900 flex items-center">
+                <LineChart className="h-5 w-5 text-blue-600 mr-2" />
+                Valor em Estoque (últimos 6 meses)
+              </h2>
+              <p className="text-sm text-gray-600 mt-1">
+                Evolução do investimento considerando o custo de aquisição de cada produto.
+              </p>
+            </div>
+        <div
+          className="icon-wrapper-square"
+          style={{ borderColor: '#bfdbfe', backgroundColor: '#eff6ff', color: '#2563eb' }}
+        >
+          <DollarSign className="icon-wrapper-square__icon" />
+        </div>
+          </div>
+        </div>
+        <div className="p-6 md:p-8">
+          {estoquePorMes.length === 0 || maxValorEstoqueSerie === 0 ? (
+            <div className="text-center py-10 text-sm text-gray-500">
+              Nenhum dado disponível para exibir o histórico de estoque.
+            </div>
+          ) : (
+              <div className="bg-blue-50 border border-blue-200 rounded-2xl p-6 md:p-8 shadow-sm">
+                <div
+                  className="flex justify-between items-end"
+                  style={{ minHeight: '200px', gap: '1.5rem', padding: '0 0.75rem' }}
+                >
+                {estoquePorMes.map((item) => {
+                  const altura = Math.max((item.valor / maxValorEstoqueSerie) * 100, 6);
+                  return (
+                      <div key={item.label} className="flex-1 flex flex-col items-center">
+                        <div
+                          className="flex items-end justify-center w-full rounded-xl"
+                          style={{
+                            height: '150px',
+                            padding: '0.5rem 0.35rem',
+                            backgroundColor: 'rgba(255,255,255,0.35)',
+                            border: '1px solid rgba(191, 219, 254, 0.6)',
+                          }}
+                        >
+                        <div
+                          style={{
+                            height: `${altura}%`,
+                            minHeight: '18px',
+                            width: '100%',
+                            maxWidth: '46px',
+                            borderRadius: '12px 12px 6px 6px',
+                            background: 'linear-gradient(180deg, rgba(37,99,235,0.85) 0%, rgba(29,78,216,0.95) 100%)',
+                            display: 'flex',
+                            alignItems: 'flex-end',
+                            justifyContent: 'center',
+                            boxShadow: '0 10px 20px -12px rgba(37,99,235,0.6)',
+                          }}
+                        >
+                          <span
+                            style={{
+                              fontSize: '0.65rem',
+                              color: '#ffffff',
+                              fontWeight: 700,
+                              marginBottom: '6px',
+                              textAlign: 'center',
+                              padding: '0 6px',
+                              lineHeight: 1.1,
+                            }}
+                          >
+                            {formatCurrency(item.valor)}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="mt-3 px-3 py-1 rounded-full bg-white border border-blue-100 text-xs font-semibold text-blue-700 shadow-sm">
+                        {item.label}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+        </div>
+
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200">
+        <div className="p-6 border-b border-gray-200">
+          <div className="flex items-start justify-between">
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900 flex items-center">
+                <PieChart className="h-5 w-5 text-purple-600 mr-2" />
+                Distribuição de Estoque
+              </h2>
+              <p className="text-sm text-gray-600 mt-1">
+                Percentual de produtos por nível de cobertura de estoque.
+              </p>
+            </div>
+        <div
+          className="icon-wrapper-square"
+          style={{ borderColor: '#d8b4fe', backgroundColor: '#f3e8ff', color: '#7c3aed' }}
+        >
+          <Package className="icon-wrapper-square__icon" />
+        </div>
+          </div>
+        </div>
+          <div className="p-6 md:p-8 space-y-5">
+            {estatisticas.produtosFiltrados.length === 0 ? (
+              <div className="text-center py-10 text-sm text-gray-500">
+                Cadastre produtos para visualizar a distribuição de estoque.
+              </div>
+            ) : (
+              niveisEstoque.map((nivel) => (
+                <div key={nivel.key}>
+                  <div className="flex justify-between mb-2 text-sm">
+                    <span className="font-medium text-gray-700">{nivel.label}</span>
+                    <span className="text-gray-500">
+                      {distribuicaoEstoque.counts[nivel.key]} produtos · {distribuicaoEstoque.percent[nivel.key]}%
+                    </span>
+                  </div>
+                  <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
+                    <div
+                      className="h-3 rounded-full transition-all"
+                      style={{
+                        width: `${distribuicaoEstoque.percent[nivel.key]}%`,
+                        backgroundColor: nivel.color,
+                      }}
+                    ></div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Insights rápidos */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {insightsRapidos.map((insight) => {
+          const Icone = insight.icon;
+          return (
+            <div key={insight.title} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex flex-col justify-between">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-700">{insight.title}</p>
+                  <p className="mt-3 text-3xl font-bold" style={{ color: insight.accent }}>
+                    {insight.value}
+                  </p>
+                </div>
+                <div
+                  className="w-12 h-12 rounded-lg flex items-center justify-center border"
+                  style={{
+                    backgroundColor: `${insight.accent}1A`,
+                    borderColor: `${insight.accent}33`,
+                  }}
+                >
+                <Icone className="icon-wrapper-square__icon" style={{ color: insight.accent }} />
+                </div>
+              </div>
+              <p className="mt-4 text-sm text-gray-500 leading-relaxed">{insight.description}</p>
+              <div
+                className="mt-4 h-1 rounded-full"
+                style={{
+                  background: `linear-gradient(90deg, ${insight.accent} 0%, ${insight.accent}AA 100%)`,
+                }}
+              ></div>
+          </div>
+          );
+        })}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

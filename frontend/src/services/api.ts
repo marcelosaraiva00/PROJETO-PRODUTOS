@@ -73,6 +73,9 @@ export const produtoService = {
   cadastrar: async (produto: NovoProduto): Promise<Produto> => {
     const formData = new FormData();
     formData.append('nome', produto.nome);
+    if (produto.fornecedor !== undefined) {
+      formData.append('fornecedor', produto.fornecedor);
+    }
     formData.append('precoCompra', produto.precoCompra.toString());
     formData.append('quantidadeComprada', produto.quantidadeComprada.toString());
     
@@ -101,6 +104,7 @@ export const produtoService = {
     
     // Adicionar apenas campos fornecidos
     if (produto.nome) formData.append('nome', produto.nome);
+    if (produto.fornecedor !== undefined) formData.append('fornecedor', produto.fornecedor);
     if (produto.precoCompra) formData.append('precoCompra', produto.precoCompra.toString());
     if (produto.quantidadeComprada) formData.append('quantidadeComprada', produto.quantidadeComprada.toString());
     if (produto.imagem) formData.append('imagem', produto.imagem);

@@ -1,3 +1,9 @@
+.icon-wrapper-square__icon {
+  width: 1.35rem;
+  height: 1.35rem;
+  color: inherit;
+}
+
 /* Reset e Base */
 * {
   margin: 0;
@@ -137,18 +143,24 @@ body {
 .bg-gray-200 { background-color: #e5e7eb; }
 .bg-blue-50 { background-color: #eff6ff; }
 .bg-blue-100 { background-color: #dbeafe; }
+.bg-blue-200 { background-color: #bfdbfe; }
 .bg-blue-600 { background-color: #2563eb; }
 .bg-blue-700 { background-color: #1d4ed8; }
 .bg-green-50 { background-color: #f0fdf4; }
 .bg-green-100 { background-color: #dcfce7; }
+.bg-green-200 { background-color: #bbf7d0; }
 .bg-green-600 { background-color: #16a34a; }
 .bg-red-50 { background-color: #fef2f2; }
 .bg-red-100 { background-color: #fee2e2; }
 .bg-red-200 { background-color: #fecaca; }
+.bg-red-600 { background-color: #dc2626; }
+.bg-red-700 { background-color: #b91c1c; }
 .bg-purple-50 { background-color: #faf5ff; }
 .bg-purple-100 { background-color: #f3e8ff; }
 .bg-purple-600 { background-color: #9333ea; }
 .bg-yellow-100 { background-color: #fef3c7; }
+.bg-yellow-200 { background-color: #fde68a; }
+.bg-yellow-500 { background-color: #eab308; }
 .bg-yellow-600 { background-color: #d97706; }
 
 .text-white { color: #ffffff; }
@@ -167,6 +179,23 @@ body {
 .text-purple-600 { color: #9333ea; }
 .text-purple-700 { color: #7c3aed; }
 .text-yellow-600 { color: #d97706; }
+
+.icon-wrapper-square {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-width: 2px;
+  border-style: solid;
+  font-size: 1.25rem;
+}
+
+.icon-wrapper-square__icon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
 
 /* Borders */
 .border { border-width: 1px; border-style: solid; }
